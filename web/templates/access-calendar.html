@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Access Your Calendar</title>
+        <link rel="stylesheet" href="/common.css">
+    </head>
+    <body class="page-form-small">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/">Tournaments</a>
+                    <a href="/registrations">Registrations</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <div class="container">
+            <h1>Access Your Calendar</h1>
+            <p class="description">
+                Enter your calendar access code to manage your calendar settings.
+                Your access code consists of 4 groups of 4 characters.
+            </p>
+
+            <div class="info-box">
+                <p><strong>Format:</strong> xxxx-xxxx-xxxx-xxxx</p>
+                <p><strong>Example:</strong> a3b5-c7d9-e2f4-g6h8</p>
+            </div>
+
+            <form method="POST" action="/calendar/edit" id="accessForm">
+                <div class="id-input-container">
+                    <input
+                        type="text"
+                        class="id-input"
+                        id="group1"
+                        maxlength="4"
+                        required
+                        autocomplete="off"
+                        pattern="[a-z0-9]{4}"
+                    />
+                    <span class="separator">-</span>
+                    <input
+                        type="text"
+                        class="id-input"
+                        id="group2"
+                        maxlength="4"
+                        required
+                        autocomplete="off"
+                        pattern="[a-z0-9]{4}"
+                    />
+                    <span class="separator">-</span>
+                    <input
+                        type="text"
+                        class="id-input"
+                        id="group3"
+                        maxlength="4"
+                        required
+                        autocomplete="off"
+                        pattern="[a-z0-9]{4}"
+                    />
+                    <span class="separator">-</span>
+                    <input
+                        type="text"
+                        class="id-input"
+                        id="group4"
+                        maxlength="4"
+                        required
+                        autocomplete="off"
+                        pattern="[a-z0-9]{4}"
+                    />
+                </div>
+
+                <input type="hidden" name="editId" id="editId" />
+
+                <p class="error-message" id="errorMessage">
+                    Please enter all 4 groups of characters.
+                </p>
+
+                <button type="submit" id="submitBtn" disabled>
+                    Access Calendar
+                </button>
+            </form>
+        </div>
+        </div>
+
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+
+            const inputs = [
+                document.getElementById("group1"),
+                document.getElementById("group2"),
+                document.getElementById("group3"),
+                document.getElementById("group4"),
+            ];
+            const submitBtn = document.getElementById("submitBtn");
+            const errorMessage = document.getElementById("errorMessage");
+            const editIdInput = document.getElementById("editId");
+
+            // Auto-focus next input when current is filled
+            inputs.forEach((input, index) => {
+                input.addEventListener("input", function (e) {
+                    const value = e.target.value.toLowerCase();
+                    e.target.value = value;
+
+                    if (value.length === 4 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+
+                    checkFormComplete();
+                });
+
+                // Handle backspace to go to previous input
+                input.addEventListener("keydown", function (e) {
+                    if (
+                        e.key === "Backspace" &&
+                        e.target.value === "" &&
+                        index > 0
+                    ) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                // Handle paste across all inputs
+                input.addEventListener("paste", function (e) {
+                    e.preventDefault();
+                    const pastedText = e.clipboardData
+                        .getData("text")
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]/g, "");
+
+                    if (pastedText.length >= 16) {
+                        inputs[0].value = pastedText.substr(0, 4);
+                        inputs[1].value = pastedText.substr(4, 4);
+                        inputs[2].value = pastedText.substr(8, 4);
+                        inputs[3].value = pastedText.substr(12, 4);
+                        checkFormComplete();
+                    }
+                });
+            });
+
+            function checkFormComplete() {
+                const allFilled = inputs.every(
+                    (input) => input.value.length === 4,
+                );
+                submitBtn.disabled = !allFilled;
+
+                if (allFilled) {
+                    errorMessage.style.display = "none";
+                    // Construct the edit ID
+                    const editId = inputs.map((input) => input.value).join("");
+                    editIdInput.value = editId;
+                }
+            }
+
+            // Prevent form submission if not complete
+            document
+                .getElementById("accessForm")
+                .addEventListener("submit", function (e) {
+                    if (submitBtn.disabled) {
+                        e.preventDefault();
+                        errorMessage.style.display = "block";
+                    }
+                });
+
+            // Focus first input on load
+            inputs[0].focus();
+        </script>
+    </body>
+</html>

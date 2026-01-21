@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{.Title}} - Tournament Details</title>
+        <link rel="stylesheet" href="/common.css">
+    </head>
+    <body class="page-form-large">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/">Tournaments</a>
+                    <a href="/registrations">Registrations</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="margin: 0;">{{.Title}}</h1>
+                <a href="/tournaments" class="button-small" id="back-button">← Back</a>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Location</h3>
+                    <div class="value">{{.Localtion}}</div>
+                </div>
+
+                <div class="detail-card">
+                    {{template "date-range" (dict "Start" .StartDate "End" .EndDate)}}
+                    <div class="value" style="margin-top: 12px;">
+                        <span class="tournament-status status-{{.Status | lower}}">{{.Status}}</span>
+                    </div>
+                </div>
+
+                {{if .PdgaTier}}
+                <div class="detail-card">
+                    <h3>PDGA Tier</h3>
+                    <div class="value">{{.PdgaTier}}</div>
+                </div>
+                {{end}}
+
+                {{if .DRating}}
+                <div class="detail-card">
+                    <h3>D-Rating</h3>
+                    <div class="value">Available</div>
+                </div>
+                {{end}}
+
+                {{if .Series}}
+                <div class="detail-card">
+                    <h3>Series</h3>
+                    <div class="value">
+                        {{range $index, $series := .Series}}
+                            {{if $index}}, {{end}}{{$series}}
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+
+            {{if .Registrations}}
+            <div class="section">
+                <h2>Registration Phases</h2>
+                <div class="registration-phases">
+                    {{range .Registrations}}
+                    <div class="phase-card">
+                        <h4>{{.Title}}</h4>
+                        <div class="phase-info">
+                            <div class="phase-info-item">
+                                <label>Registration Opens</label>
+                                <div class="value">{{.StartDate.Format "Jan 2, 2006 15:04"}}</div>
+                            </div>
+                            <div class="phase-info-item">
+                                <label>Registration Closes</label>
+                                <div class="value">{{.EndDate.Format "Jan 2, 2006 15:04"}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+            <div class="section">
+                <h2>External Links</h2>
+                <div class="external-links">
+                    <a href="https://turniere.discgolf.de/index.php?p=events&sp=view&id={{.Id}}"
+                       target="_blank"
+                       class="tournament-link">
+                        View on turniere.discgolf.de →
+                    </a>
+                    {{if .PdgaId}}
+                    <a href="https://www.pdga.com/tour/event/{{.PdgaId}}"
+                       target="_blank"
+                       class="tournament-link">
+                        View on PDGA.com →
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        </div>
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+
+            // Smart back button - uses browser history
+            document.addEventListener('DOMContentLoaded', function() {
+                const backButton = document.getElementById('back-button');
+
+                backButton.addEventListener('click', function(e) {
+                    // Check if there's history to go back to
+                    if (document.referrer && document.referrer.includes(window.location.host)) {
+                        e.preventDefault();
+                        history.back();
+                    }
+                    // Otherwise, fall through to the href default (/tournaments)
+                });
+            });
+        </script>
+    </body>
+</html>

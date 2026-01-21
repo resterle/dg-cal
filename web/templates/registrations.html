@@ -1,0 +1,351 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Registrations</title>
+        <link rel="stylesheet" href="/common.css">
+        <script src="/table-filters.js"></script>
+    </head>
+    <body class="page-table">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/tournaments">Tournaments</a>
+                    <a href="/registrations" class="active">Registrations</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <h1>Registrations</h1>
+            <p class="sync-info">
+                <span class="sync-indicator" id="sync-indicator"></span>
+                <span id="sync-text">Last synced: {{ .LastSync }}</span>
+                <span id="sync-time" data-iso="{{ .LastSyncISO }}" style="display:none;"></span>
+            </p>
+            <div class="filters-container">
+                <div class="filters-row">
+                    <div class="filter-item-wide">
+                        <label class="filter-label">Search</label>
+                        <input type="text" id="filter-search" class="filter-input" placeholder="Tournament name...">
+                    </div>
+
+                    <div class="filter-item-wide">
+                        <label class="filter-label">Series</label>
+                        <select id="filter-series-dropdown" class="filter-select-small" onchange="addSeriesFilter()">
+                            <option value="">Select series...</option>
+                        </select>
+                        <div class="filter-tags" id="series-tags"></div>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">Status</label>
+                        <select id="filter-status" class="filter-select">
+                            <option value="all">All</option>
+                            <option value="open">Open</option>
+                            <option value="upcoming">Upcoming</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">&nbsp;</label>
+                        <button id="reset-filters" class="filter-reset-btn">Reset All</button>
+                    </div>
+                </div>
+            </div>
+
+        <div class="table-container">
+            <table id="registrations-table">
+            <tbody>
+                {{range .Open}}
+                <tr data-title="{{.TournamentTitle}}" data-series="{{join .TournamentSeries ","}}" data-status="open">
+                    <td>
+                        {{template "date-range-with-time" (dict "Start" .RegistrationStart "End" .RegistrationEnd)}}
+                        <div class="registration-status-text">
+                            {{if .ClosesToday}}
+                            <span class="closes-today-text">Closes Today {{.RegistrationEnd.Format "15:04"}}</span>
+                            {{else if .ClosesTomorrow}}
+                            <span class="closes-tomorrow-text">Closes Tomorrow {{.RegistrationEnd.Format "15:04"}}</span>
+                            {{else if gt .DaysLeft 2}}
+                            <span class="days-left-text">{{.DaysLeft}} Days Left</span>
+                            {{end}}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="/tournament/{{.TournamentId}}">{{.TournamentTitle}}</a>
+                        <div class="registration-phase-name">{{.PhaseTitle}}</div>
+                    </td>
+                    <td>
+                        <div class="badges-cell">
+                            <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.TournamentId}}" target="_blank" class="info-badge registration-open-badge">Registration Open <span class="link-icon">↗</span></a>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+                {{if and .Open .Upcoming}}
+                <tr class="registration-divider">
+                    <td colspan="3">
+                        <div class="divider-line"></div>
+                        <div class="divider-text">Upcoming Registrations</div>
+                    </td>
+                </tr>
+                {{end}}
+                {{range .Upcoming}}
+                <tr data-title="{{.TournamentTitle}}" data-series="{{join .TournamentSeries ","}}" data-status="upcoming">
+                    <td>
+                        {{template "date-range-with-time" (dict "Start" .RegistrationStart "End" .RegistrationEnd)}}
+                        <div class="registration-status-text">
+                            {{if .OpensToday}}
+                            <span class="opens-today-text">Opens Today {{.RegistrationStart.Format "15:04"}}</span>
+                            {{else if .OpensTomorrow}}
+                            <span class="opens-tomorrow-text">Opens Tomorrow {{.RegistrationStart.Format "15:04"}}</span>
+                            {{else if gt .OpensInDays 0}}
+                            <span class="opens-in-days-text">Opens in {{.OpensInDays}} Days</span>
+                            {{end}}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="/tournament/{{.TournamentId}}">{{.TournamentTitle}}</a>
+                        <div class="registration-phase-name">{{.PhaseTitle}}</div>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                {{end}}
+                {{if not (or .Open .Upcoming)}}
+                <tr>
+                    <td colspan="3" class="empty-state">
+                        No open or upcoming registrations found.
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        </div>
+        </div>
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+
+            // Sync time display
+            function updateSyncTime() {
+                const syncTimeEl = document.getElementById('sync-time');
+                const syncTextEl = document.getElementById('sync-text');
+                const syncIndicator = document.getElementById('sync-indicator');
+
+                if (!syncTimeEl || !syncTimeEl.dataset.iso) return;
+
+                const syncDate = new Date(syncTimeEl.dataset.iso);
+                const now = new Date();
+                const diffMs = now - syncDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+
+                let relativeText;
+                if (diffMins < 1) {
+                    relativeText = 'just now';
+                    syncIndicator.className = 'sync-indicator fresh';
+                } else if (diffMins === 1) {
+                    relativeText = '1 minute ago';
+                    syncIndicator.className = 'sync-indicator fresh';
+                } else if (diffMins < 60) {
+                    relativeText = diffMins + ' minutes ago';
+                    syncIndicator.className = diffMins < 30 ? 'sync-indicator fresh' : 'sync-indicator recent';
+                } else if (diffHours === 1) {
+                    relativeText = '1 hour ago';
+                    syncIndicator.className = 'sync-indicator recent';
+                } else if (diffHours < 24) {
+                    relativeText = diffHours + ' hours ago';
+                    syncIndicator.className = 'sync-indicator stale';
+                } else {
+                    relativeText = syncDate.toLocaleDateString();
+                    syncIndicator.className = 'sync-indicator stale';
+                }
+
+                syncTextEl.textContent = 'Data from ' + relativeText;
+            }
+
+            // Initialize table filters
+            let tableFilter;
+            let seriesSet;
+            const selectedSeries = new Set();
+
+            // Function to update divider visibility
+            function updateDividerVisibility() {
+                const divider = document.querySelector('.registration-divider');
+                if (!divider) return;
+
+                // Check if there are visible open rows
+                const openRows = document.querySelectorAll('tr[data-status="open"]');
+                const hasVisibleOpen = Array.from(openRows).some(row => row.style.display !== 'none');
+
+                // Check if there are visible upcoming rows
+                const upcomingRows = document.querySelectorAll('tr[data-status="upcoming"]');
+                const hasVisibleUpcoming = Array.from(upcomingRows).some(row => row.style.display !== 'none');
+
+                // Show divider only if both sections have visible rows
+                divider.style.display = (hasVisibleOpen && hasVisibleUpcoming) ? '' : 'none';
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Update sync time display
+                updateSyncTime();
+                setInterval(updateSyncTime, 60000);
+
+                tableFilter = new TableFilter('#registrations-table');
+
+                // Set callback to update divider after filtering
+                tableFilter.onFilterChange = updateDividerVisibility;
+
+                // Add search filter
+                tableFilter.addFilter('search', {
+                    value: '',
+                    fn: (row, value) => {
+                        if (!value) return true;
+                        return row.dataset.title.toLowerCase().includes(value.toLowerCase());
+                    }
+                });
+
+                // Add series filter
+                tableFilter.addFilter('series', {
+                    value: null,
+                    fn: (row, value) => {
+                        if (selectedSeries.size === 0) return true;
+                        const rowSeries = row.dataset.series.split(',');
+                        return Array.from(selectedSeries).some(s => rowSeries.includes(s));
+                    }
+                });
+
+                // Add status filter
+                tableFilter.addFilter('status', {
+                    value: 'all',
+                    fn: (row, value) => {
+                        if (value === 'all') return true;
+                        return row.dataset.status === value;
+                    }
+                });
+
+                // Populate series dropdown from table data
+                seriesSet = new Set();
+                tableFilter.rows.forEach(row => {
+                    const series = row.dataset.series;
+                    if (series) {
+                        series.split(',').forEach(s => {
+                            if (s.trim()) seriesSet.add(s.trim());
+                        });
+                    }
+                });
+                const seriesSelect = document.getElementById('filter-series-dropdown');
+                Array.from(seriesSet).sort().forEach(series => {
+                    const option = document.createElement('option');
+                    option.value = series;
+                    option.textContent = series;
+                    seriesSelect.appendChild(option);
+                });
+
+                // Event listeners
+                document.getElementById('filter-search').addEventListener('input', (e) => {
+                    tableFilter.setFilterValue('search', e.target.value.trim());
+                });
+
+                document.getElementById('filter-status').addEventListener('change', (e) => {
+                    tableFilter.setFilterValue('status', e.target.value);
+                });
+
+                // Reset button
+                document.getElementById('reset-filters').addEventListener('click', () => {
+                    // Clear search
+                    document.getElementById('filter-search').value = '';
+
+                    // Clear tags
+                    document.getElementById('series-tags').innerHTML = '';
+
+                    // Restore all options to series dropdown
+                    const seriesDropdown = document.getElementById('filter-series-dropdown');
+                    while (seriesDropdown.options.length > 1) {
+                        seriesDropdown.remove(1);
+                    }
+                    Array.from(seriesSet).sort().forEach(series => {
+                        const option = document.createElement('option');
+                        option.value = series;
+                        option.textContent = series;
+                        seriesDropdown.appendChild(option);
+                    });
+
+                    // Clear selected sets
+                    selectedSeries.clear();
+
+                    // Reset dropdowns
+                    seriesDropdown.selectedIndex = 0;
+                    document.getElementById('filter-status').value = 'all';
+
+                    tableFilter.reset();
+                });
+            });
+
+            function addSeriesFilter() {
+                const dropdown = document.getElementById('filter-series-dropdown');
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                const value = dropdown.value.trim();
+
+                if (value && !selectedSeries.has(value)) {
+                    selectedSeries.add(value);
+                    const tagsDiv = document.getElementById('series-tags');
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    tag.innerHTML = `${value} <button type="button" onclick="removeSeriesFilter('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+
+                    // Remove the option from dropdown
+                    selectedOption.remove();
+                    dropdown.selectedIndex = 0;
+                    tableFilter.setFilterValue('series', true);
+                }
+            }
+
+            function removeSeriesFilter(value) {
+                selectedSeries.delete(value);
+                updateTagDisplay('series-tags', selectedSeries, 'removeSeriesFilter');
+
+                // Add the option back to dropdown
+                const dropdown = document.getElementById('filter-series-dropdown');
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+
+                // Insert in sorted order
+                const options = Array.from(dropdown.options).slice(1); // Skip first placeholder
+                options.push(option);
+                options.sort((a, b) => a.value.localeCompare(b.value));
+
+                // Clear and rebuild
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                options.forEach(opt => dropdown.add(opt));
+
+                tableFilter.setFilterValue('series', true);
+            }
+
+            function updateTagDisplay(tagsDivId, selectedSet, removeFnName) {
+                const tagsDiv = document.getElementById(tagsDivId);
+                tagsDiv.innerHTML = '';
+                selectedSet.forEach(value => {
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    tag.innerHTML = `${value} <button type="button" onclick="${removeFnName}('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+                });
+            }
+        </script>
+    </body>
+</html>

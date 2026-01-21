@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DG Cal - Disc Golf Calendar</title>
+        <link rel="stylesheet" href="/common.css">
+        <style>
+            .welcome-hero {
+                text-align: center;
+                padding: 60px 20px;
+            }
+
+            .welcome-logo {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+
+            .welcome-title {
+                font-size: 36px;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 12px;
+            }
+
+            .welcome-subtitle {
+                font-size: 18px;
+                color: #5a6c7d;
+                margin-bottom: 48px;
+                max-width: 500px;
+                margin-left: auto;
+                margin-right: auto;
+                line-height: 1.6;
+            }
+
+            .welcome-links {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .welcome-link {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 32px 40px;
+                background-color: white;
+                border: 1px solid #e8ecef;
+                border-radius: 12px;
+                text-decoration: none;
+                color: #2c3e50;
+                min-width: 200px;
+                transition: all 0.2s ease;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+
+            .welcome-link:hover {
+                border-color: #3d7a5f;
+                box-shadow: 0 4px 12px rgba(61, 122, 95, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .welcome-link-icon {
+                font-size: 40px;
+                margin-bottom: 16px;
+            }
+
+            .welcome-link-title {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .welcome-link-description {
+                font-size: 14px;
+                color: #5a6c7d;
+                text-align: center;
+            }
+
+            .welcome-footer {
+                margin-top: 60px;
+                text-align: center;
+            }
+
+            .welcome-footer-links {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .welcome-footer-links a {
+                color: #5a6c7d;
+                text-decoration: none;
+                font-size: 14px;
+                padding: 8px 16px;
+                border-radius: 6px;
+                transition: all 0.15s ease;
+            }
+
+            .welcome-footer-links a:hover {
+                background-color: #f4f6f8;
+                color: #2c3e50;
+            }
+
+            @media (max-width: 600px) {
+                .welcome-hero {
+                    padding: 40px 15px;
+                }
+
+                .welcome-logo {
+                    font-size: 48px;
+                }
+
+                .welcome-title {
+                    font-size: 28px;
+                }
+
+                .welcome-subtitle {
+                    font-size: 16px;
+                }
+
+                .welcome-links {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .welcome-link {
+                    width: 100%;
+                    max-width: 300px;
+                }
+            }
+        </style>
+    </head>
+    <body class="page-form-small">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/tournaments">Tournaments</a>
+                    <a href="/registrations">Registrations</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <div class="welcome-hero">
+                <div class="welcome-logo">🥏➡️🗓️</div>
+                <h1 class="welcome-title">Welcome to DG Cal</h1>
+                <p class="welcome-subtitle">
+                    Your personal disc golf calendar. Browse tournaments, track registrations, and never miss an event.
+                </p>
+
+                <div class="welcome-links">
+                    <a href="/tournaments" class="welcome-link">
+                        <span class="welcome-link-icon">🏆</span>
+                        <span class="welcome-link-title">Tournaments</span>
+                        <span class="welcome-link-description">Browse all upcoming disc golf tournaments</span>
+                    </a>
+                    <a href="/registrations" class="welcome-link">
+                        <span class="welcome-link-icon">📝</span>
+                        <span class="welcome-link-title">Registrations</span>
+                        <span class="welcome-link-description">View open and upcoming registrations</span>
+                    </a>
+                </div>
+
+                <div class="welcome-footer">
+                    <div class="welcome-footer-links">
+                        <a href="/calendar/new">Create Calendar</a>
+                        <a href="/calendar/edit">Access Existing Calendar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+        </script>
+    </body>
+</html>

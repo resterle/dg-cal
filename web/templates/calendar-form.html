@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{.PageTitle}}</title>
+        <link rel="stylesheet" href="/common.css">
+    </head>
+    <body class="page-form-large">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/">Tournaments</a>
+                    <a href="/registrations">Registrations</a>
+                    {{if .ShowAdminLink}}<a href="/admin" class="active">Admin</a>{{end}}
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <div class="container">
+            {{if .BackLink}}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>{{.PageTitle}}</h1>
+                <a href="{{.BackLink}}" class="button-small">← Back to Admin</a>
+            </div>
+            {{else}}
+            <h1>{{.PageTitle}}</h1>
+            {{end}}
+
+            <div class="calendar-url-box">
+                <div class="calendar-url-title">📅 Calendar Subscription Link</div>
+                <div class="calendar-url-container">
+                    <input
+                        type="text"
+                        readonly
+                        value="{{.CalendarUrl}}"
+                        id="calendarUrl"
+                        class="calendar-url-input"
+                        onclick="this.select()"
+                    />
+                    <button
+                        type="button"
+                        onclick="copyCalendarUrl()"
+                        class="copy-link-button"
+                    >
+                        Copy Link
+                    </button>
+                </div>
+                <div class="calendar-url-info">
+                    {{.CalendarUrlInfo}}
+                </div>
+            </div>
+
+            <form
+                method="POST"
+                action="{{.FormAction}}"
+                id="editForm"
+            >
+                <div class="section">
+                    <h2>Calendar Details</h2>
+                    <label for="title">Calendar Title:</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{.Calendar.Title}}"
+                        required
+                    />
+                </div>
+
+                <div class="section">
+                    <h2>Series Selection</h2>
+                    <p>
+                        Add series to automatically include all tournaments from
+                        these series.
+                    </p>
+                    <div id="seriesTags">
+                        {{range .Calendar.Config.Series}}
+                        <span class="series-tag">
+                            {{.}}
+                            <button
+                                type="button"
+                                onclick="removeSeries(this, '{{.}}')"
+                            >
+                                ×
+                            </button>
+                        </span>
+                        {{end}}
+                    </div>
+                    <div class="series-input-group">
+                        <select id="seriesDropdown">
+                            <option value="">-- Select a series --</option>
+                        </select>
+                        <button
+                            type="button"
+                            class="add-series-btn"
+                            onclick="addSeries()"
+                        >
+                            Add Series
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Individual Tournaments</h2>
+                    <p>
+                        Select specific tournaments to include in your calendar.
+                    </p>
+                    <div class="filter-box">
+                        <input
+                            type="text"
+                            id="tournamentFilter"
+                            placeholder="Search tournaments..."
+                            onkeyup="filterTournaments()"
+                        />
+                        <select
+                            id="seriesFilter"
+                            onchange="filterTournaments()"
+                        >
+                            <option value="">All Series</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group" id="tournamentList">
+                        {{range .Tournaments}}
+                        <div class="checkbox-item tournament-item">
+                            <label>
+                                <div class="checkbox-wrapper">
+                                    <input
+                                        type="checkbox"
+                                        name="tournaments"
+                                        value="{{.Id}}"
+                                        {{if
+                                        contains
+                                        $.Calendar.Config.Tournaments
+                                        .Id}}checked{{end}}
+                                    />
+                                    <div class="tournament-info">
+                                        <div class="tournament-title">
+                                            <span>{{.Title}}</span>
+                                            <a href="https://turniere.discgolf.de/index.php?p=events&sp=view&id={{.Id}}"
+                                               target="_blank"
+                                               class="tournament-link"
+                                               title="View on turniere.discgolf.de">
+                                                🔗
+                                            </a>
+                                        </div>
+                                        <div class="tournament-meta">
+                                            <div class="tournament-location">
+                                                {{.Localtion}}
+                                            </div>
+                                            {{if .Status}}
+                                            <span class="tournament-status status-{{.Status | lower}}">
+                                                {{.Status}}
+                                            </span>
+                                            {{end}}
+                                            {{if .Series}}
+                                            <div class="tournament-series">
+                                                {{range .Series}}
+                                                <span class="series-badge">{{.}}</span>
+                                                {{end}}
+                                            </div>
+                                            {{end}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tournament-dates">
+                                    {{if sameDay .StartDate .EndDate}}
+                                    <div class="date-badge">
+                                        <div class="date-weekday">{{formatWeekday .StartDate}}</div>
+                                        <div class="date-day">{{formatDay .StartDate}}</div>
+                                        <div class="date-month">{{formatMonth .StartDate}}</div>
+                                    </div>
+                                    {{else}}
+                                    <div class="date-badge">
+                                        <div class="date-weekday">{{formatWeekday .StartDate}}</div>
+                                        <div class="date-day">{{formatDay .StartDate}}</div>
+                                        <div class="date-month">{{formatMonth .StartDate}}</div>
+                                    </div>
+                                    <span class="date-separator">→</span>
+                                    <div class="date-badge">
+                                        <div class="date-weekday">{{formatWeekday .EndDate}}</div>
+                                        <div class="date-day">{{formatDay .EndDate}}</div>
+                                        <div class="date-month">{{formatMonth .EndDate}}</div>
+                                    </div>
+                                {{end}}
+                                </div>
+                            </label>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+        </div>
+
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+
+            let seriesSet = new Set([
+                {{range .Calendar.Config.Series}}'{{.}}',{{end}}
+            ]);
+
+            // Initialize on page load
+            document.addEventListener("DOMContentLoaded", function () {
+                // Populate series dropdown from tournament data
+                const allSeries = new Set();
+                {{range .Tournaments}}
+                    {{range .Series}}
+                        allSeries.add('{{.}}');
+                    {{end}}
+                {{end}}
+
+                const dropdown = document.getElementById("seriesDropdown");
+                const sortedSeries = Array.from(allSeries).sort();
+                sortedSeries.forEach(series => {
+                    const option = document.createElement("option");
+                    option.value = series;
+                    option.textContent = series;
+                    dropdown.appendChild(option);
+                });
+
+                // Populate series filter dropdown
+                const seriesFilterDropdown = document.getElementById("seriesFilter");
+                sortedSeries.forEach(series => {
+                    const option = document.createElement("option");
+                    option.value = series;
+                    option.textContent = series;
+                    seriesFilterDropdown.appendChild(option);
+                });
+
+                // Initialize form with existing series as hidden inputs
+                seriesSet.forEach((series) => {
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "series";
+                    hiddenInput.value = series;
+                    hiddenInput.id = `series-${series}`;
+                    document
+                        .getElementById("editForm")
+                        .appendChild(hiddenInput);
+                });
+
+                // Mark Sundays in red
+                document.querySelectorAll('.date-weekday').forEach(weekday => {
+                    if (weekday.textContent.trim().toUpperCase() === 'SUN') {
+                        weekday.classList.add('sunday');
+                    }
+                });
+            });
+
+            function addSeries() {
+                const dropdown = document.getElementById("seriesDropdown");
+                const series = dropdown.value.trim();
+
+                if (series && !seriesSet.has(series)) {
+                    seriesSet.add(series);
+                    const tagsDiv = document.getElementById("seriesTags");
+                    const tag = document.createElement("span");
+                    tag.className = "series-tag";
+                    tag.innerHTML = `${series} <button type="button" onclick="removeSeries(this, '${series}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+
+                    // Add hidden input for form submission
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.type = "hidden";
+                    hiddenInput.name = "series";
+                    hiddenInput.value = series;
+                    hiddenInput.id = `series-${series}`;
+                    document
+                        .getElementById("editForm")
+                        .appendChild(hiddenInput);
+
+                    dropdown.selectedIndex = 0;
+                }
+            }
+
+            function removeSeries(button, series) {
+                seriesSet.delete(series);
+                button.parentElement.remove();
+                const hiddenInput = document.getElementById(`series-${series}`);
+                if (hiddenInput) {
+                    hiddenInput.remove();
+                }
+            }
+
+            function filterTournaments() {
+                const textFilter = document
+                    .getElementById("tournamentFilter")
+                    .value.toLowerCase();
+                const seriesFilter = document
+                    .getElementById("seriesFilter")
+                    .value;
+
+                const items = document.getElementsByClassName("tournament-item");
+
+                for (let item of items) {
+                    const text = item.textContent.toLowerCase();
+                    const seriesBadges = item.querySelectorAll(".series-badge");
+                    const itemSeries = Array.from(seriesBadges).map(badge => badge.textContent.trim());
+
+                    const matchesText = !textFilter || text.includes(textFilter);
+                    const matchesSeries = !seriesFilter || itemSeries.includes(seriesFilter);
+
+                    item.style.display = (matchesText && matchesSeries) ? "block" : "none";
+                }
+            }
+
+            function copyCalendarUrl() {
+                const urlInput = document.getElementById("calendarUrl");
+                urlInput.select();
+                urlInput.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(urlInput.value);
+
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = "Copied!";
+                button.style.backgroundColor = "#45a049";
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.backgroundColor = "#4caf50";
+                }, 2000);
+            }
+        </script>
+    </body>
+</html>

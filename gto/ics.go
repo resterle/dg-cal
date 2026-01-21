@@ -4,19 +4,47 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/resterle/dg-cal/v2/model"
 )
 
-func FetchTournaments() (map[int]*model.Tournament, error) {
+func (s *GtoService) FetchTournaments() (map[int]*model.Tournament, error) {
+	result := map[int]*model.Tournament{}
+
+	updates, err := s.fetchTournamentUpdates()
+	if err != nil {
+		return map[int]*model.Tournament{}, err
+	}
+
 	icsEvents, err := fetchIcs()
 	if err != nil {
 		return map[int]*model.Tournament{}, err
 	}
-	return parseIcsEvents(icsEvents)
+	tournaments, err := parseIcsEvents(icsEvents)
+	if err != nil {
+		return map[int]*model.Tournament{}, err
+	}
+
+	for id, update := range updates {
+		tournament := tournaments[id]
+		if tournament == nil {
+			if slices.Contains([]string{model.TOURNAMENT_STATUS_CANCELLED, model.TOURNAMENT_STATUS_DONE}, update.status) {
+				tournament = &model.Tournament{Id: id, Status: update.status}
+			} else {
+				continue
+			}
+		}
+		tournament.UpdatedAt = update.updated
+		tournament.Status = update.status
+		result[id] = tournament
+	}
+
+	return result, nil
 }
 
 func fetchIcs() ([]*ics.VEvent, error) {
@@ -61,12 +89,11 @@ func parseIcsEvents(events []*ics.VEvent) (map[int]*model.Tournament, error) {
 			result[id] = tournament
 		}
 
-		parser := parseTournament
 		if t == model.EVENT_TYPE_REGISTRATION {
-			parser = parseRegistration
+			continue
 		}
 
-		if err := parser(event, tournament); err != nil {
+		if err := parseTournament(event, tournament); err != nil {
 			return map[int]*model.Tournament{}, err
 		}
 	}
@@ -94,7 +121,6 @@ func typeAndId(uid string) (int, int, error) {
 }
 
 func parseTournament(event *ics.VEvent, tournament *model.Tournament) error {
-	tournament.Ics = *event
 	dtStart, err := event.GetStartAt()
 	if err != nil {
 		return err
@@ -105,7 +131,8 @@ func parseTournament(event *ics.VEvent, tournament *model.Tournament) error {
 	if err != nil {
 		return err
 	}
-	tournament.EndDate = dtEnd
+	// Convert exclusive DTEND to an inclusive end date while ignoring DST hour shifts.
+	tournament.EndDate = time.Date(dtEnd.Year(), dtEnd.Month(), dtEnd.Day(), 0, 0, 0, 0, dtEnd.Location()).AddDate(0, 0, -1)
 
 	summaryProp := event.GetProperty(ics.ComponentPropertySummary)
 	summary := ""
@@ -114,15 +141,10 @@ func parseTournament(event *ics.VEvent, tournament *model.Tournament) error {
 	}
 	tournament.Title = summary
 
-	updatedAt, err := event.GetDtStampTime()
-	if err != nil {
-		fmt.Printf("EEEE %+v", err)
-		return err
-	}
-	tournament.UpdatedAt = updatedAt
 	return nil
 }
 
+/*
 func parseRegistration(event *ics.VEvent, tournament *model.Tournament) error {
 	registration := model.Registration{Ics: *event}
 
@@ -144,6 +166,7 @@ func parseRegistration(event *ics.VEvent, tournament *model.Tournament) error {
 		return err
 	}
 	registration.UpdatedAt = updatedAt
-	tournament.Registration = &registration
+	tournament.Registrations = &registration
 	return nil
 }
+*/

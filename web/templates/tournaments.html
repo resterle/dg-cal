@@ -1,0 +1,604 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Tournaments</title>
+        <link rel="stylesheet" href="/common.css">
+        <script src="/table-filters.js"></script>
+    </head>
+    <body class="page-table">
+        <nav class="top-nav">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="logo">🥏➡️🗓️</span>
+                    <span class="brand-text">DG Cal</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/tournaments" class="active">Tournaments</a>
+                    <a href="/registrations">Registrations</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="/calendar/edit">Access Calendar</a>
+                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            </div>
+        </nav>
+        <div class="main-content">
+            <h1>Tournaments</h1>
+            <p class="sync-info">
+                <span class="sync-indicator" id="sync-indicator"></span>
+                <span id="sync-text">Last synced: {{ .LastSync }}</span>
+                <span id="sync-time" data-iso="{{ .LastSyncISO }}" style="display:none;"></span>
+            </p>
+            <div class="filters-container">
+                <div class="filters-row">
+                    <div class="filter-item-wide">
+                        <label class="filter-label">Search</label>
+                        <input type="text" id="filter-search" class="filter-input" placeholder="Tournament name...">
+                    </div>
+
+                    <div class="filter-item-wide">
+                        <label class="filter-label">Series</label>
+                        <select id="filter-series-dropdown" class="filter-select-small" onchange="addSeriesFilter()">
+                            <option value="">Select series...</option>
+                        </select>
+                        <div class="filter-tags" id="series-tags"></div>
+                    </div>
+
+                    <div class="filter-item-wide">
+                        <label class="filter-label">PDGA Tier</label>
+                        <select id="filter-pdga-dropdown" class="filter-select-small" onchange="addPdgaFilter()">
+                            <option value="">Select tier...</option>
+                        </select>
+                        <div class="filter-tags" id="pdga-tags"></div>
+                    </div>
+
+                    <div class="filter-item-wide">
+                        <label class="filter-label">Month</label>
+                        <select id="filter-month-dropdown" class="filter-select-small" onchange="addMonthFilter()">
+                            <option value="">Select month...</option>
+                        </select>
+                        <div class="filter-tags" id="month-tags"></div>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">Year</label>
+                        <select id="filter-year" class="filter-select">
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">D-Rating</label>
+                        <select id="filter-drating" class="filter-select">
+                            <option value="all">All</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">Sort</label>
+                        <select id="filter-sort" class="filter-select">
+                            <option value="asc">Earliest First</option>
+                            <option value="desc">Latest First</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label class="filter-label">&nbsp;</label>
+                        <button id="reset-filters" class="filter-reset-btn">Reset All</button>
+                    </div>
+                </div>
+            </div>
+
+        <div class="table-container">
+            <table id="tournaments-table">
+            <tbody>
+                {{range $groupIndex, $group := .Groups}}
+                    {{if gt $groupIndex 0}}
+                    <tr class="tournament-year-divider">
+                        <td colspan="3">
+                            <div class="divider-line"></div>
+                            <div class="divider-text">{{$group.Year}}</div>
+                        </td>
+                    </tr>
+                    {{end}}
+                    {{range $group.Tournaments}}
+                    {{$tournamentId := .Id}}
+                    <tr data-title="{{.Title}}" data-series="{{join .Series ","}}" data-pdga="{{.PdgaTier}}" data-drating="{{if .DRating}}yes{{else}}no{{end}}" data-month="{{.StartDate.Format "2006-01"}}" data-date="{{.StartDate.Format "2006-01-02"}}" data-year="{{.StartDate.Format "2006"}}">
+                        <td data-sort-value="{{.StartDate.Format "2006-01-02"}}">
+                            {{template "date-range" (dict "Start" .StartDate "End" .EndDate)}}
+                            {{$tournament := .}}
+                            <div class="reg-status-list">
+                                {{if .HasActiveRegistration}}
+                                <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.Id}}" target="_blank" class="reg-item open">{{if and .HasMultiplePhases .ActiveRegistrationTitle}}{{.ActiveRegistrationTitle}} · {{end}}Registration Open ↗</a>
+                                {{end}}
+                                {{range .UpcomingRegistrations}}
+                                <span class="reg-item {{if .OpensToday}}today{{else if .OpensTomorrow}}tomorrow{{end}}">{{if $tournament.HasMultiplePhases}}{{if .Title}}{{.Title}} · {{end}}{{end}}Reg. {{if .OpensToday}}opens today {{.StartTime.Format "15:04"}}{{else if .OpensTomorrow}}opens tomorrow {{.StartTime.Format "15:04"}}{{else}}opens in {{.OpensInDays}}d{{end}}</span>
+                                {{end}}
+                                {{if and (not .HasActiveRegistration) (not .UpcomingRegistrations)}}
+                                <span class="reg-item status">{{.Status}}</span>
+                                {{end}}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/tournament/{{.Id}}">{{.Title}}</a>
+                            {{if .Localtion}}
+                            <div class="tournament-location">
+                                {{if .GeoLocation}}
+                                <a href="https://www.openstreetmap.org/search?query={{.GeoLocation}}" target="_blank" class="location-link">{{.Localtion}} <span class="link-icon">↗</span></a>
+                                {{else}}
+                                {{.Localtion}}
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </td>
+                        <td>
+                            <div class="badges-cell">
+                                {{range .Series}}
+                                <a href="https://turniere.discgolf.de/index.php?p=events&sp=view&id={{$tournamentId}}" target="_blank" class="info-badge series-badge">{{.}} <span class="link-icon">↗</span></a>
+                                {{end}}
+                                {{if .PdgaTier}}
+                                    {{if .PdgaId}}
+                                    <a href="https://www.pdga.com/tour/event/{{.PdgaId}}" target="_blank" class="info-badge pdga-badge">{{.PdgaTier}}-Tier <span class="link-icon">↗</span></a>
+                                    {{else}}
+                                    <span class="info-badge pdga-badge">{{.PdgaTier}}-Tier</span>
+                                    {{end}}
+                                {{end}}
+                                {{if .DRating}}
+                                <span class="info-badge drating-badge">D-Rating</span>
+                                {{end}}
+                            </div>
+                        </td>
+                    </tr>
+                    {{end}}
+                {{end}}
+            </tbody>
+        </table>
+        </div>
+        </div>
+        <script>
+            function toggleMobileMenu() {
+                document.querySelector('.nav-links').classList.toggle('mobile-open');
+                document.querySelector('.nav-actions').classList.toggle('mobile-open');
+            }
+
+            // Sync time display
+            function updateSyncTime() {
+                const syncTimeEl = document.getElementById('sync-time');
+                const syncTextEl = document.getElementById('sync-text');
+                const syncIndicator = document.getElementById('sync-indicator');
+
+                if (!syncTimeEl || !syncTimeEl.dataset.iso) return;
+
+                const syncDate = new Date(syncTimeEl.dataset.iso);
+                const now = new Date();
+                const diffMs = now - syncDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+
+                let relativeText;
+                if (diffMins < 1) {
+                    relativeText = 'just now';
+                    syncIndicator.className = 'sync-indicator fresh';
+                } else if (diffMins === 1) {
+                    relativeText = '1 minute ago';
+                    syncIndicator.className = 'sync-indicator fresh';
+                } else if (diffMins < 60) {
+                    relativeText = diffMins + ' minutes ago';
+                    syncIndicator.className = diffMins < 30 ? 'sync-indicator fresh' : 'sync-indicator recent';
+                } else if (diffHours === 1) {
+                    relativeText = '1 hour ago';
+                    syncIndicator.className = 'sync-indicator recent';
+                } else if (diffHours < 24) {
+                    relativeText = diffHours + ' hours ago';
+                    syncIndicator.className = 'sync-indicator stale';
+                } else {
+                    relativeText = syncDate.toLocaleDateString();
+                    syncIndicator.className = 'sync-indicator stale';
+                }
+
+                syncTextEl.textContent = 'Data from ' + relativeText;
+            }
+
+            // Initialize table filters
+            let tableFilter;
+            let seriesSet;
+            let pdgaSet;
+            const selectedSeries = new Set();
+            const selectedPdga = new Set();
+            const selectedMonths = new Set();
+            const monthsData = new Map(); // Store value -> display mapping
+
+            // Generate 12 months starting from current month
+            function getNext12Months() {
+                const months = [];
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth(); // 0-11
+
+                for (let i = 0; i < 12; i++) {
+                    const date = new Date(currentYear, currentMonth + i, 1);
+                    const yearMonth = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const displayName = monthNames[date.getMonth()] + (date.getFullYear() > currentYear ? ' ' + date.getFullYear() : '');
+                    months.push({ value: yearMonth, display: displayName });
+                }
+                return months;
+            }
+
+            // Function to update year divider visibility
+            function updateYearDividers() {
+                const dividers = document.querySelectorAll('.tournament-year-divider');
+                dividers.forEach(divider => {
+                    // Find all tournament rows between this divider and the next divider (or end of table)
+                    let nextRow = divider.nextElementSibling;
+                    let hasVisibleTournaments = false;
+
+                    while (nextRow && !nextRow.classList.contains('tournament-year-divider')) {
+                        if (nextRow.style.display !== 'none') {
+                            hasVisibleTournaments = true;
+                            break;
+                        }
+                        nextRow = nextRow.nextElementSibling;
+                    }
+
+                    // Hide divider if no tournaments are visible in this year group
+                    divider.style.display = hasVisibleTournaments ? '' : 'none';
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Update sync time display
+                updateSyncTime();
+                setInterval(updateSyncTime, 60000);
+
+                tableFilter = new TableFilter('#tournaments-table');
+
+                // Set callback to update dividers after filtering
+                tableFilter.onFilterChange = updateYearDividers;
+
+                // Add search filter
+                tableFilter.addFilter('search', {
+                    value: '',
+                    fn: (row, value) => {
+                        if (!value) return true;
+                        return row.dataset.title.toLowerCase().includes(value.toLowerCase());
+                    }
+                });
+
+                // Add series filter
+                tableFilter.addFilter('series', {
+                    value: null,
+                    fn: (row, value) => {
+                        if (selectedSeries.size === 0) return true;
+                        const rowSeries = row.dataset.series.split(',');
+                        return Array.from(selectedSeries).some(s => rowSeries.includes(s));
+                    }
+                });
+
+                // Add PDGA tier filter
+                tableFilter.addFilter('pdga', {
+                    value: null,
+                    fn: (row, value) => {
+                        if (selectedPdga.size === 0) return true;
+                        return selectedPdga.has(row.dataset.pdga);
+                    }
+                });
+
+                // Add year filter
+                tableFilter.addFilter('year', {
+                    value: 'all',
+                    fn: (row, value) => {
+                        if (value === 'all') return true;
+                        return row.dataset.year === value;
+                    }
+                });
+
+                // Add D-Rating filter
+                tableFilter.addFilter('drating', {
+                    value: 'all',
+                    fn: (row, value) => {
+                        if (value === 'all') return true;
+                        return row.dataset.drating === value;
+                    }
+                });
+
+                // Add month filter
+                tableFilter.addFilter('month', {
+                    value: null,
+                    fn: (row, value) => {
+                        if (selectedMonths.size === 0) return true;
+                        return selectedMonths.has(row.dataset.month);
+                    }
+                });
+
+                // Populate series dropdown
+                seriesSet = new Set();
+                tableFilter.rows.forEach(row => {
+                    const series = row.dataset.series;
+                    if (series) {
+                        series.split(',').forEach(s => {
+                            if (s.trim()) seriesSet.add(s.trim());
+                        });
+                    }
+                });
+                const seriesSelect = document.getElementById('filter-series-dropdown');
+                Array.from(seriesSet).sort().forEach(series => {
+                    const option = document.createElement('option');
+                    option.value = series;
+                    option.textContent = series;
+                    seriesSelect.appendChild(option);
+                });
+
+                // Populate PDGA tier dropdown
+                pdgaSet = new Set();
+                tableFilter.rows.forEach(row => {
+                    const pdga = row.dataset.pdga;
+                    if (pdga) pdgaSet.add(pdga);
+                });
+                const pdgaSelect = document.getElementById('filter-pdga-dropdown');
+                Array.from(pdgaSet).sort().forEach(pdga => {
+                    const option = document.createElement('option');
+                    option.value = pdga;
+                    option.textContent = pdga + '-Tier';
+                    pdgaSelect.appendChild(option);
+                });
+
+                // Populate month dropdown (next 12 months)
+                const monthSelect = document.getElementById('filter-month-dropdown');
+                const next12Months = getNext12Months();
+                next12Months.forEach(month => {
+                    monthsData.set(month.value, month.display);
+                    const option = document.createElement('option');
+                    option.value = month.value;
+                    option.textContent = month.display;
+                    monthSelect.appendChild(option);
+                });
+
+                // Populate year dropdown
+                const yearSet = new Set();
+                tableFilter.rows.forEach(row => {
+                    const year = row.dataset.year;
+                    if (year) yearSet.add(year);
+                });
+                const yearSelect = document.getElementById('filter-year');
+                Array.from(yearSet).sort().forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+
+                // Event listeners
+                document.getElementById('filter-search').addEventListener('input', (e) => {
+                    tableFilter.setFilterValue('search', e.target.value.trim());
+                });
+
+                document.getElementById('filter-year').addEventListener('change', (e) => {
+                    tableFilter.setFilterValue('year', e.target.value);
+                });
+
+                document.getElementById('filter-drating').addEventListener('change', (e) => {
+                    tableFilter.setFilterValue('drating', e.target.value);
+                });
+
+                document.getElementById('filter-sort').addEventListener('change', (e) => {
+                    tableFilter.sort(0, e.target.value);
+                });
+
+                // Reset button
+                document.getElementById('reset-filters').addEventListener('click', () => {
+                    // Clear search
+                    document.getElementById('filter-search').value = '';
+
+                    // Clear tags
+                    document.getElementById('series-tags').innerHTML = '';
+                    document.getElementById('pdga-tags').innerHTML = '';
+                    document.getElementById('month-tags').innerHTML = '';
+
+                    // Restore all options to series dropdown
+                    const seriesDropdown = document.getElementById('filter-series-dropdown');
+                    while (seriesDropdown.options.length > 1) {
+                        seriesDropdown.remove(1);
+                    }
+                    Array.from(seriesSet).sort().forEach(series => {
+                        const option = document.createElement('option');
+                        option.value = series;
+                        option.textContent = series;
+                        seriesDropdown.appendChild(option);
+                    });
+
+                    // Restore all options to PDGA dropdown
+                    const pdgaDropdown = document.getElementById('filter-pdga-dropdown');
+                    while (pdgaDropdown.options.length > 1) {
+                        pdgaDropdown.remove(1);
+                    }
+                    Array.from(pdgaSet).sort().forEach(pdga => {
+                        const option = document.createElement('option');
+                        option.value = pdga;
+                        option.textContent = pdga + '-Tier';
+                        pdgaDropdown.appendChild(option);
+                    });
+
+                    // Restore all options to month dropdown
+                    const monthDropdown = document.getElementById('filter-month-dropdown');
+                    while (monthDropdown.options.length > 1) {
+                        monthDropdown.remove(1);
+                    }
+                    const next12Months = getNext12Months();
+                    next12Months.forEach(month => {
+                        const option = document.createElement('option');
+                        option.value = month.value;
+                        option.textContent = month.display;
+                        monthDropdown.appendChild(option);
+                    });
+
+                    // Clear selected sets
+                    selectedSeries.clear();
+                    selectedPdga.clear();
+                    selectedMonths.clear();
+
+                    // Reset other dropdowns
+                    seriesDropdown.selectedIndex = 0;
+                    pdgaDropdown.selectedIndex = 0;
+                    monthDropdown.selectedIndex = 0;
+                    document.getElementById('filter-year').value = 'all';
+                    document.getElementById('filter-drating').value = 'all';
+                    document.getElementById('filter-sort').value = 'asc';
+
+                    tableFilter.reset();
+                });
+            });
+
+            function addSeriesFilter() {
+                const dropdown = document.getElementById('filter-series-dropdown');
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                const value = dropdown.value.trim();
+
+                if (value && !selectedSeries.has(value)) {
+                    selectedSeries.add(value);
+                    const tagsDiv = document.getElementById('series-tags');
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    tag.innerHTML = `${value} <button type="button" onclick="removeSeriesFilter('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+
+                    // Remove the option from dropdown
+                    selectedOption.remove();
+                    dropdown.selectedIndex = 0;
+                    tableFilter.setFilterValue('series', true);
+                }
+            }
+
+            function removeSeriesFilter(value) {
+                selectedSeries.delete(value);
+                updateTagDisplay('series-tags', selectedSeries, 'removeSeriesFilter');
+
+                // Add the option back to dropdown
+                const dropdown = document.getElementById('filter-series-dropdown');
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+
+                // Insert in sorted order
+                const options = Array.from(dropdown.options).slice(1); // Skip first placeholder
+                options.push(option);
+                options.sort((a, b) => a.value.localeCompare(b.value));
+
+                // Clear and rebuild
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                options.forEach(opt => dropdown.add(opt));
+
+                tableFilter.setFilterValue('series', true);
+            }
+
+            function addPdgaFilter() {
+                const dropdown = document.getElementById('filter-pdga-dropdown');
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                const value = dropdown.value.trim();
+
+                if (value && !selectedPdga.has(value)) {
+                    selectedPdga.add(value);
+                    const tagsDiv = document.getElementById('pdga-tags');
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    tag.innerHTML = `${value}-Tier <button type="button" onclick="removePdgaFilter('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+
+                    // Remove the option from dropdown
+                    selectedOption.remove();
+                    dropdown.selectedIndex = 0;
+                    tableFilter.setFilterValue('pdga', true);
+                }
+            }
+
+            function removePdgaFilter(value) {
+                selectedPdga.delete(value);
+                updateTagDisplay('pdga-tags', selectedPdga, 'removePdgaFilter');
+
+                // Add the option back to dropdown
+                const dropdown = document.getElementById('filter-pdga-dropdown');
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value + '-Tier';
+
+                // Insert in sorted order
+                const options = Array.from(dropdown.options).slice(1);
+                options.push(option);
+                options.sort((a, b) => a.value.localeCompare(b.value));
+
+                // Clear and rebuild
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                options.forEach(opt => dropdown.add(opt));
+
+                tableFilter.setFilterValue('pdga', true);
+            }
+
+            function addMonthFilter() {
+                const dropdown = document.getElementById('filter-month-dropdown');
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                const value = dropdown.value.trim();
+
+                if (value && !selectedMonths.has(value)) {
+                    selectedMonths.add(value);
+                    const tagsDiv = document.getElementById('month-tags');
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    const display = monthsData.get(value);
+                    tag.innerHTML = `${display} <button type="button" onclick="removeMonthFilter('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+
+                    // Remove the option from dropdown
+                    selectedOption.remove();
+                    dropdown.selectedIndex = 0;
+                    tableFilter.setFilterValue('month', true);
+                }
+            }
+
+            function removeMonthFilter(value) {
+                selectedMonths.delete(value);
+                updateTagDisplay('month-tags', selectedMonths, 'removeMonthFilter');
+
+                // Add the option back to dropdown
+                const dropdown = document.getElementById('filter-month-dropdown');
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = monthsData.get(value);
+
+                // Insert back maintaining order (months are already in chronological order)
+                const allMonths = Array.from(monthsData.keys());
+                const currentOptions = Array.from(dropdown.options).slice(1);
+                const allOptions = [...currentOptions, option];
+                allOptions.sort((a, b) => allMonths.indexOf(a.value) - allMonths.indexOf(b.value));
+
+                // Clear and rebuild
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                allOptions.forEach(opt => dropdown.add(opt));
+
+                tableFilter.setFilterValue('month', true);
+            }
+
+            function updateTagDisplay(tagsDivId, selectedSet, removeFnName) {
+                const tagsDiv = document.getElementById(tagsDivId);
+                tagsDiv.innerHTML = '';
+                selectedSet.forEach(value => {
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag';
+                    let display = value;
+                    if (tagsDivId === 'pdga-tags') display = value + '-Tier';
+                    if (tagsDivId === 'month-tags') display = monthsData.get(value);
+                    tag.innerHTML = `${display} <button type="button" onclick="${removeFnName}('${value}')">×</button>`;
+                    tagsDiv.appendChild(tag);
+                });
+            }
+        </script>
+    </body>
+</html>

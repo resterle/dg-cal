@@ -3,78 +3,120 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/resterle/dg-cal/v2/db"
 	"github.com/resterle/dg-cal/v2/gto"
-	"github.com/resterle/dg-cal/v2/model"
+	"github.com/resterle/dg-cal/v2/service"
+	"github.com/resterle/dg-cal/v2/web"
 
 	// Import sqlite3 driver for database/sql - registers itself via init()
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
-var tournaments map[int]model.Tournament
-var repo db.Repo
+var repo *db.Repo
+var ticker *time.Ticker
 
 func main() {
-	tournaments = make(map[int]model.Tournament)
-
 	var err error
-	repo, err = db.NewRepo("events.db")
+
+	sessionId := os.Getenv("SESSION_ID")
+	if sessionId == "" {
+		panic("SESSION_ID missing")
+	}
+
+	loginData := os.Getenv("LOGIN_DATA")
+	if loginData == "" {
+		panic("LOGIN_DATA missing")
+	}
+
+	syncIntervalS := os.Getenv("SYNC_INTERVAL")
+	if syncIntervalS == "" {
+		syncIntervalS = "30"
+	}
+	syncIntervalInMinutes, err := strconv.Atoi(syncIntervalS)
+	if err != nil {
+		panic("sync interval " + err.Error())
+	}
+
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		panic("DB_PATH missing")
+	}
+
+	dbDir := filepath.Dir(dbPath)
+	err = os.MkdirAll(dbDir, 0755)
+	if err != nil {
+		log.Fatalf("Failed to create database directory: %v", err)
+	}
+
+	repo, err = db.NewRepo(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer repo.Close()
 
-	fmt.Printf("Database initialized successfully %+v\n", repo)
-	fmt.Println("Tables created: tournaments, registrations")
-	fmt.Println()
+	gtoService := gto.NewGtoService(sessionId, loginData)
 
-	/*
-		gtoEvents, err := gto.FetchTournaments()
-		fmt.Printf("\nGTO %s --> %v\n", err, len(gtoEvents))
+	tournamentService, err := service.NewTournamentService(repo, &gtoService)
+	if err != nil {
+		panic(err)
+	}
+	calendarservice := service.NewCalendarService(repo)
 
-		ttt, err := repo.GetAllTournaments()
-		fmt.Printf("DB %s --> %v\n", err, len(ttt))
-	*/
-	fmt.Printf("LOAD %s\n", load())
-	fmt.Printf("SYNC %s\n", sync())
+	icsService := service.NewIcsService(calendarservice, tournamentService)
+
+	syncInterval := time.Minute * time.Duration(syncIntervalInMinutes)
+	ticker = time.NewTicker(syncInterval)
+	defer ticker.Stop()
+	go scheduler(tournamentService, syncIntervalInMinutes)
+
+	webApp := web.NewWebApp(tournamentService, calendarservice, icsService, syncInterval)
+
+	http.HandleFunc("GET /{$}", webApp.WelcomeHandler)
+	http.HandleFunc("GET /tournaments", webApp.TournamentsHandler)
+	http.HandleFunc("GET /tournament/{id}", webApp.TournamentDetailHandler)
+	http.HandleFunc("GET /registrations", webApp.RegistrationsHandler)
+	http.HandleFunc("GET /calendar/new", webApp.CreateCalendarFormHandler)
+	http.HandleFunc("POST /calendar/create", webApp.CreateCalendarHandler)
+	http.HandleFunc("GET /calendar/created", webApp.CalendarCreatedHandler)
+	http.HandleFunc("GET /calendar/edit", webApp.AccessCalendarFormHandler)
+	http.HandleFunc("POST /calendar/edit", webApp.AccessCalendarHandler)
+	http.HandleFunc("GET /calendar/edit/{id}", webApp.EditCalendarFormHandler)
+	http.HandleFunc("POST /calendar/edit/{id}", webApp.EditCalendarHandler)
+	http.HandleFunc("GET /api/tournaments", webApp.TournamentHandler)
+	http.HandleFunc("GET /ical/{id}", webApp.IcsHandler)
+	http.HandleFunc("GET /common.css", webApp.CommonCSSHandler)
+	http.HandleFunc("GET /table-filters.js", webApp.TableFiltersJSHandler)
+	http.HandleFunc("GET /fonts/{name}", webApp.FontHandler)
+
+	http.HandleFunc("GET /admin", webApp.AdminHandler)
+	http.HandleFunc("POST /admin/calendar/delete/{id}", webApp.DeleteCalendarHandler)
+	http.HandleFunc("GET /admin/calendar/{id}", webApp.AdminViewCalendarHandler)
+	http.HandleFunc("POST /admin/calendar/{id}", webApp.AdminUpdateCalendarHandler)
+	http.HandleFunc("GET /admin/tournaments", webApp.AdminTournamentsHandler)
+	http.HandleFunc("GET /admin/tournament/{id}/history", webApp.AdminTournamentHistoryHandler)
+
+	http.HandleFunc("/", webApp.NotFoundHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Printf("Web service starting on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, web.LoggingMiddleware(http.DefaultServeMux)))
+
 }
 
-func sync() error {
-	log.Printf("SYNC")
-	gtoTournaments, err := gto.FetchTournaments()
-	if err != nil {
-		return err
+func scheduler(s *service.TournamentService, syncInterval int) {
+	for {
+		s.Sync()
+		log.Printf("Next sync in %d minutes", syncInterval)
+		<-ticker.C
 	}
-	for _, gtoT := range gtoTournaments {
-		storedT := tournaments[gtoT.Id]
-		if storedT.UpdatedAt.Before(gtoT.UpdatedAt) {
-			log.Printf("Info: updating %d", gtoT.Id)
-			details, err := gto.FetchEventDetails(gtoT.Id)
-			if err != nil {
-				log.Printf("Error: loading %d failed", gtoT.Id)
-				return err
-			}
-			gtoT.Serie = details.Series
-			gtoT.PdgaStatus = details.PDGAStatus
-			gtoT.DRating = details.DRatingConsideration
-			tournaments[gtoT.Id] = *gtoT
-			repo.UpsertTournament(gtoT)
-		} else if storedT.Registration != nil && gtoT.Registration != nil && storedT.Registration.UpdatedAt.Before(gtoT.Registration.UpdatedAt) {
-			repo.UpsertRegistration(gtoT.Id, gtoT.Registration)
-		}
-	}
-	return nil
-}
-
-func load() error {
-	log.Printf("LOAD")
-	t, err := repo.GetAllTournaments()
-	if err != nil {
-		return err
-	}
-	for _, tt := range t {
-		tournaments[tt.Id] = tt
-	}
-	return nil
 }

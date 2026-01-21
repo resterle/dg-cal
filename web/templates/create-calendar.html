@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Calendar</title>
+    <link rel="stylesheet" href="/common.css">
+</head>
+<body class="page-form-small">
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <span class="logo">🥏➡️🗓️</span>
+                <span class="brand-text">DG Cal</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Tournaments</a>
+                <a href="/registrations">Registrations</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/calendar/edit">Access Calendar</a>
+                <a href="/calendar/new" class="primary">Create Calendar</a>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+    <div class="main-content">
+        <div class="container">
+        <h1>Create a New Calendar</h1>
+        <p class="description">
+            Create a personalized tournament calendar. You'll receive a unique access code to manage your calendar.
+        </p>
+        <form method="POST" action="/calendar/create">
+            <label for="title">Calendar Title:</label>
+            <input type="text" id="title" name="title" placeholder="Enter a title for your calendar" required>
+            <button type="submit">Create Calendar</button>
+        </form>
+    </div>
+    </div>
+    <script>
+        function toggleMobileMenu() {
+            document.querySelector('.nav-links').classList.toggle('mobile-open');
+            document.querySelector('.nav-actions').classList.toggle('mobile-open');
+        }
+    </script>
+</body>
+</html>

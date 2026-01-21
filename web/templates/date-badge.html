@@ -1,0 +1,35 @@
+{{define "date-badge"}}
+<div class="date-badge" data-tooltip="{{.Format "02.01.2006"}}">
+    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .}}</div>
+    <div class="date-day">{{formatDay .}}</div>
+    <div class="date-month">{{formatMonth .}}</div>
+</div>
+{{end}}
+
+{{define "date-range"}}
+<div class="tournament-dates">
+    {{template "date-badge" .Start}}
+    {{if not (sameDay .Start .End)}}
+    <span class="date-separator">→</span>
+    {{template "date-badge" .End}}
+    {{end}}
+</div>
+{{end}}
+
+{{define "date-badge-with-time"}}
+<div class="date-badge" data-tooltip="{{.Format "02.01.2006 15:04"}}">
+    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .}}</div>
+    <div class="date-day">{{formatDay .}}</div>
+    <div class="date-month">{{formatMonth .}}</div>
+</div>
+{{end}}
+
+{{define "date-range-with-time"}}
+<div class="tournament-dates">
+    {{template "date-badge-with-time" .Start}}
+    {{if not (sameDay .Start .End)}}
+    <span class="date-separator">→</span>
+    {{template "date-badge-with-time" .End}}
+    {{end}}
+</div>
+{{end}}
