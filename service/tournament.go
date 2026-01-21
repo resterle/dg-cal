@@ -134,7 +134,6 @@ func (s *TournamentService) Sync() error {
 		}
 	}
 
-
 	t := time.Now()
 	s.lastSync = &t
 

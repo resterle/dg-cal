@@ -175,7 +175,6 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 		},
 	}
 
-
 	loc, _ := time.LoadLocation("Europe/Berlin")
 	templates := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*.html"))
 	return WebApp{
@@ -190,12 +189,12 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 }
 
 type UpcomingRegistration struct {
-	Lang string
-	Title       string
-	OpensToday  bool
+	Lang          string
+	Title         string
+	OpensToday    bool
 	OpensTomorrow bool
-	OpensInDays int
-	StartTime   time.Time
+	OpensInDays   int
+	StartTime     time.Time
 }
 
 type TournamentView struct {
@@ -207,13 +206,13 @@ type TournamentView struct {
 }
 
 type TournamentYearGroup struct {
-	Lang string
+	Lang        string
 	Year        int
 	Tournaments []*TournamentView
 }
 
 type TournamentsPageData struct {
-	Lang string
+	Lang        string
 	LastSync    string
 	LastSyncISO string
 	Groups      []TournamentYearGroup
@@ -306,7 +305,7 @@ func (app *WebApp) TournamentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := TournamentsPageData{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:        GetLanguageFromContext(r.Context()),
 		Groups:      groups,
 		LastSync:    app.lastSync(),
 		LastSyncISO: app.lastSyncISO(),
@@ -339,7 +338,7 @@ type RegistrationWithTournament struct {
 }
 
 type RegistrationsPageData struct {
-	Lang string
+	Lang        string
 	Open        []RegistrationWithTournament
 	Upcoming    []RegistrationWithTournament
 	LastSync    string
@@ -437,7 +436,7 @@ func (app *WebApp) RegistrationsHandler(w http.ResponseWriter, r *http.Request) 
 	})
 
 	data := RegistrationsPageData{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:        GetLanguageFromContext(r.Context()),
 		Open:        openRegistrations,
 		Upcoming:    upcomingRegistrations,
 		LastSync:    app.lastSync(),
@@ -501,10 +500,10 @@ func (app *WebApp) CalendarCreatedHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	data := struct {
-		Lang string
+		Lang   string
 		EditId string
 	}{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:   GetLanguageFromContext(r.Context()),
 		EditId: editId,
 	}
 
@@ -571,7 +570,7 @@ func (app *WebApp) EditCalendarFormHandler(w http.ResponseWriter, r *http.Reques
 	calendarUrl := fmt.Sprintf("%s://%s/ical/%s", scheme, host, calendar.Id)
 
 	data := struct {
-		Lang string
+		Lang            string
 		PageTitle       string
 		FormAction      string
 		CalendarUrl     string
@@ -582,7 +581,7 @@ func (app *WebApp) EditCalendarFormHandler(w http.ResponseWriter, r *http.Reques
 		Tournaments     []*model.Tournament
 		Series          []string
 	}{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:            GetLanguageFromContext(r.Context()),
 		PageTitle:       "Edit Calendar",
 		FormAction:      "/calendar/edit/" + id,
 		CalendarUrl:     calendarUrl,
@@ -825,12 +824,12 @@ func (app *WebApp) AdminViewCalendarHandler(w http.ResponseWriter, r *http.Reque
 	series := app.tournamentService.GetAllSeries()
 
 	data := struct {
-		Lang string
+		Lang          string
 		Calendar      *model.Calendar
 		TournamentIds string
 		Series        []string
 	}{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:          GetLanguageFromContext(r.Context()),
 		Calendar:      calendar,
 		TournamentIds: tournamentIds,
 		Series:        series,
@@ -986,11 +985,11 @@ func (app *WebApp) AdminTournamentHistoryHandler(w http.ResponseWriter, r *http.
 	})
 
 	data := struct {
-		Lang string
+		Lang       string
 		Tournament *model.Tournament
 		History    []*model.Tournament
 	}{
-		Lang: GetLanguageFromContext(r.Context()),
+		Lang:       GetLanguageFromContext(r.Context()),
 		Tournament: tournament,
 		History:    history,
 	}
@@ -1059,13 +1058,13 @@ func (app *WebApp) lastSyncISO() string {
 	return ""
 }
 
-func (app *WebApp)addCachingHeader(resp http.ResponseWriter){
+func (app *WebApp) addCachingHeader(resp http.ResponseWriter) {
 	nextSync := app.tournamentService.GetLastSync().Add(app.syncInterval)
-	caheUntil := int((time.Until(nextSync)+2*time.Minute).Seconds())
+	caheUntil := int((time.Until(nextSync) + 2*time.Minute).Seconds())
 
 	resp.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", caheUntil))
 }
 
-func (app *WebApp)removeCachingHeader(resp http.ResponseWriter){
+func (app *WebApp) removeCachingHeader(resp http.ResponseWriter) {
 	resp.Header().Del("Cache-Control")
 }
