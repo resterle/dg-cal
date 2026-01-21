@@ -112,12 +112,16 @@ class TableFilter {
             if (this.sortDirection === 'desc' || index > 0) {
                 const divider = document.createElement('tr');
                 divider.className = 'tournament-year-divider';
-                divider.innerHTML = `
-                    <td colspan="3">
-                        <div class="divider-line"></div>
-                        <div class="divider-text">${year}</div>
-                    </td>
-                `;
+                const td = document.createElement('td');
+                td.colSpan = 3;
+                const line = document.createElement('div');
+                line.className = 'divider-line';
+                const text = document.createElement('div');
+                text.className = 'divider-text';
+                text.textContent = year;
+                td.appendChild(line);
+                td.appendChild(text);
+                divider.appendChild(td);
                 this.tbody.appendChild(divider);
             }
 
@@ -188,7 +192,7 @@ function extractUniqueValues(tableFilter, columnIndex, selector) {
 
 // Helper to populate select dropdown
 function populateSelect(selectElement, values, includeAll = true) {
-    selectElement.innerHTML = '';
+    selectElement.textContent = '';
 
     if (includeAll) {
         const allOption = document.createElement('option');

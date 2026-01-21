@@ -3,23 +3,27 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Calendar Created Successfully</title>
+        <title>{{T "calendar.created_title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-form-small">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
@@ -27,51 +31,43 @@
         <div class="main-content">
             <div class="container">
             <div class="success-icon">&#10004;</div>
-            <h1 class="success">Calendar Created Successfully!</h1>
+            <h1 class="success">{{T "calendar.created_title" .Lang}}</h1>
 
             <div class="warning">
-                <strong>&#9888; Important: Write This Down!</strong>
-                This is your calendar's access code. You will need it to access
-                and manage your calendar. This code will not be shown again, so
-                please save it now!
+                <strong>&#9888; {{T "calendar.write_this_down" .Lang}}</strong>
+                {{T "calendar.access_code_important" .Lang}}
             </div>
 
             <div class="id-container">
-                <div class="id-label">Your Calendar Access Code</div>
+                <div class="id-label">{{T "calendar.your_access_code" .Lang}}</div>
                 <div class="id-code" id="edit-id">{{.EditId | formatAccessCode}}</div>
             </div>
 
             <div class="instructions">
-                <strong>What to do next:</strong>
+                <strong>{{T "calendar.what_next" .Lang}}</strong>
                 <ul>
-                    <li>Copy and save this access code in a safe place</li>
-                    <li>You will need this code to access your calendar</li>
-                    <li>
-                        Do not share this code with anyone unless you want them
-                        to have access to your calendar
-                    </li>
-                    <li>
-                        If you lose this code, you will need to create a new
-                        calendar
-                    </li>
+                    <li>{{T "calendar.instruction_save" .Lang}}</li>
+                    <li>{{T "calendar.instruction_need" .Lang}}</li>
+                    <li>{{T "calendar.instruction_share" .Lang}}</li>
+                    <li>{{T "calendar.instruction_lost" .Lang}}</li>
                 </ul>
             </div>
 
             <div class="info-box" style="margin-top: 20px;">
-                <p><strong>Quick Access:</strong></p>
-                <p>You can also bookmark this link to access your calendar directly without entering the access code:</p>
+                <p><strong>{{T "calendar.quick_access" .Lang}}</strong></p>
+                <p>{{T "calendar.quick_access_desc" .Lang}}</p>
                 <p style="margin-top: 10px;">
-                    <a href="/calendar/edit/{{.EditId}}" class="tournament-link" style="font-size: 15px; font-weight: 500;">
-                        Go to Calendar Editor →
+                    <a href="/calendar/edit/{{.EditId}}?lang={{.Lang}}" class="tournament-link" style="font-size: 15px; font-weight: 500;">
+                        {{T "calendar.go_to_editor" .Lang}} →
                     </a>
                 </p>
             </div>
 
             <div class="action-buttons">
                 <button class="copy-button" onclick="copyAccessCode()">
-                    Copy Access Code
+                    {{T "common.copy_code" .Lang}}
                 </button>
-                <a href="/" class="button home-button">Go to Home</a>
+                <a href="/?lang={{.Lang}}" class="button home-button">{{T "error.go_home" .Lang}}</a>
             </div>
         </div>
         </div>
@@ -90,7 +86,7 @@
                     .then(() => {
                         const button = document.querySelector(".copy-button");
                         const originalText = button.textContent;
-                        button.textContent = "Copied!";
+                        button.textContent = "{{T "common.copied" .Lang}}";
                         setTimeout(() => {
                             button.textContent = originalText;
                         }, 2000);

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -15,6 +16,9 @@ import (
 	"github.com/resterle/dg-cal/v2/model"
 	"github.com/resterle/dg-cal/v2/service"
 )
+
+const defaultLang = "de"
+const langContextKey = "langContextKey"
 
 //go:embed templates/*.html
 var templatesFS embed.FS
@@ -33,8 +37,9 @@ type WebApp struct {
 	tournamentService TournamentServiceInterface
 	icsService        IcsServiceInterface
 	templates         *template.Template
-	loc *time.Location
-	syncInterval time.Duration
+	translator        *Translator
+	loc               *time.Location
+	syncInterval      time.Duration
 }
 
 type CalendarServiceInterface interface {
@@ -59,7 +64,17 @@ type IcsServiceInterface interface {
 }
 
 func NewWebApp(tournamentService TournamentServiceInterface, calendarService CalendarServiceInterface, icsService IcsServiceInterface, syncInterval time.Duration) WebApp {
+	// Initialize translator with English as default language
+	translator := NewTranslator(defaultLang)
+
 	funcMap := template.FuncMap{
+		// Translation functions
+		"T": func(key string, lang string) string {
+			return translator.T(lang, key)
+		},
+		"TArgs": func(key string, lang string, args ...interface{}) string {
+			return translator.TWithArgs(lang, key, args...)
+		},
 		"contains": func(slice []int, item int) bool {
 			return slices.Contains(slice, item)
 		},
@@ -77,6 +92,15 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 		},
 		"formatMonth": func(t any) string {
 			if date, ok := t.(time.Time); ok {
+				monthKeys := map[time.Month]string{
+					time.January: "month.jan", time.February: "month.feb", time.March: "month.mar",
+					time.April: "month.apr", time.May: "month.may", time.June: "month.jun",
+					time.July: "month.jul", time.August: "month.aug", time.September: "month.sep",
+					time.October: "month.oct", time.November: "month.nov", time.December: "month.dec",
+				}
+				if key, ok := monthKeys[date.Month()]; ok {
+					return translator.T("de", key)
+				}
 				return date.Format("Jan")
 			}
 			return ""
@@ -89,6 +113,14 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 		},
 		"formatWeekday": func(t any) string {
 			if date, ok := t.(time.Time); ok {
+				weekdayKeys := map[time.Weekday]string{
+					time.Monday: "weekday.mon", time.Tuesday: "weekday.tue", time.Wednesday: "weekday.wed",
+					time.Thursday: "weekday.thu", time.Friday: "weekday.fri", time.Saturday: "weekday.sat",
+					time.Sunday: "weekday.sun",
+				}
+				if key, ok := weekdayKeys[date.Weekday()]; ok {
+					return translator.T("de", key)
+				}
 				return date.Format("Mon")
 			}
 			return ""
@@ -148,15 +180,17 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 	templates := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/*.html"))
 	return WebApp{
 		tournamentService: tournamentService,
-		calendaeService: calendarService,
-		icsService: icsService,
-		templates: templates,
-		loc: loc,
-		syncInterval: syncInterval,
+		calendaeService:   calendarService,
+		icsService:        icsService,
+		templates:         templates,
+		translator:        translator,
+		loc:               loc,
+		syncInterval:      syncInterval,
 	}
 }
 
 type UpcomingRegistration struct {
+	Lang string
 	Title       string
 	OpensToday  bool
 	OpensTomorrow bool
@@ -173,11 +207,13 @@ type TournamentView struct {
 }
 
 type TournamentYearGroup struct {
+	Lang string
 	Year        int
 	Tournaments []*TournamentView
 }
 
 type TournamentsPageData struct {
+	Lang string
 	LastSync    string
 	LastSyncISO string
 	Groups      []TournamentYearGroup
@@ -270,6 +306,7 @@ func (app *WebApp) TournamentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := TournamentsPageData{
+		Lang: GetLanguageFromContext(r.Context()),
 		Groups:      groups,
 		LastSync:    app.lastSync(),
 		LastSyncISO: app.lastSyncISO(),
@@ -302,17 +339,19 @@ type RegistrationWithTournament struct {
 }
 
 type RegistrationsPageData struct {
+	Lang string
 	Open        []RegistrationWithTournament
 	Upcoming    []RegistrationWithTournament
 	LastSync    string
 	LastSyncISO string
 }
 
-func (app *WebApp) WelcomeHandler(w http.ResponseWriter, r *http.Request){
-	if err := app.templates.ExecuteTemplate(w, "welcome.html", nil); err != nil {
-        log.Printf("Template execution error: %v", err)
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
+func (app *WebApp) WelcomeHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct{ Lang string }{Lang: GetLanguageFromContext(r.Context())}
+	if err := app.templates.ExecuteTemplate(w, "welcome.html", data); err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (app *WebApp) RegistrationsHandler(w http.ResponseWriter, r *http.Request) {
@@ -398,6 +437,7 @@ func (app *WebApp) RegistrationsHandler(w http.ResponseWriter, r *http.Request) 
 	})
 
 	data := RegistrationsPageData{
+		Lang: GetLanguageFromContext(r.Context()),
 		Open:        openRegistrations,
 		Upcoming:    upcomingRegistrations,
 		LastSync:    app.lastSync(),
@@ -424,7 +464,8 @@ func (app *WebApp) TournamentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *WebApp) CreateCalendarFormHandler(w http.ResponseWriter, r *http.Request) {
-	if err := app.templates.ExecuteTemplate(w, "create-calendar.html", nil); err != nil {
+	data := struct{ Lang string }{Lang: GetLanguageFromContext(r.Context())}
+	if err := app.templates.ExecuteTemplate(w, "create-calendar.html", data); err != nil {
 		log.Printf("Template execution error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -460,8 +501,10 @@ func (app *WebApp) CalendarCreatedHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	data := struct {
+		Lang string
 		EditId string
 	}{
+		Lang: GetLanguageFromContext(r.Context()),
 		EditId: editId,
 	}
 
@@ -528,6 +571,7 @@ func (app *WebApp) EditCalendarFormHandler(w http.ResponseWriter, r *http.Reques
 	calendarUrl := fmt.Sprintf("%s://%s/ical/%s", scheme, host, calendar.Id)
 
 	data := struct {
+		Lang string
 		PageTitle       string
 		FormAction      string
 		CalendarUrl     string
@@ -538,6 +582,7 @@ func (app *WebApp) EditCalendarFormHandler(w http.ResponseWriter, r *http.Reques
 		Tournaments     []*model.Tournament
 		Series          []string
 	}{
+		Lang: GetLanguageFromContext(r.Context()),
 		PageTitle:       "Edit Calendar",
 		FormAction:      "/calendar/edit/" + id,
 		CalendarUrl:     calendarUrl,
@@ -611,7 +656,8 @@ func (app *WebApp) EditCalendarHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *WebApp) AccessCalendarFormHandler(w http.ResponseWriter, r *http.Request) {
-	if err := app.templates.ExecuteTemplate(w, "access-calendar.html", nil); err != nil {
+	data := struct{ Lang string }{Lang: GetLanguageFromContext(r.Context())}
+	if err := app.templates.ExecuteTemplate(w, "access-calendar.html", data); err != nil {
 		log.Printf("Template execution error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -683,7 +729,15 @@ func (app *WebApp) TournamentDetailHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := app.templates.ExecuteTemplate(w, "tournament-detail.html", tournament); err != nil {
+	data := struct {
+		Lang string
+		*model.Tournament
+	}{
+		Lang:       GetLanguageFromContext(r.Context()),
+		Tournament: tournament,
+	}
+
+	if err := app.templates.ExecuteTemplate(w, "tournament-detail.html", data); err != nil {
 		log.Printf("Template execution error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -702,7 +756,15 @@ func (app *WebApp) AdminHandler(w http.ResponseWriter, r *http.Request) {
 		return calendars[i].CreatedAt.After(calendars[j].CreatedAt)
 	})
 
-	if err := app.templates.ExecuteTemplate(w, "admin.html", calendars); err != nil {
+	data := struct {
+		Lang      string
+		Calendars []*model.Calendar
+	}{
+		Lang:      GetLanguageFromContext(r.Context()),
+		Calendars: calendars,
+	}
+
+	if err := app.templates.ExecuteTemplate(w, "admin.html", data); err != nil {
 		log.Printf("Template execution error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -763,10 +825,12 @@ func (app *WebApp) AdminViewCalendarHandler(w http.ResponseWriter, r *http.Reque
 	series := app.tournamentService.GetAllSeries()
 
 	data := struct {
+		Lang string
 		Calendar      *model.Calendar
 		TournamentIds string
 		Series        []string
 	}{
+		Lang: GetLanguageFromContext(r.Context()),
 		Calendar:      calendar,
 		TournamentIds: tournamentIds,
 		Series:        series,
@@ -867,13 +931,21 @@ func (app *WebApp) AdminTournamentsHandler(w http.ResponseWriter, r *http.Reques
 	})
 
 	// Create a slice to preserve the sorted order
-	data := make([]TournamentWithCount, 0, len(tournaments))
+	tournamentData := make([]TournamentWithCount, 0, len(tournaments))
 	for _, t := range tournaments {
 		count := updateCounts[t.Id]
-		data = append(data, TournamentWithCount{
+		tournamentData = append(tournamentData, TournamentWithCount{
 			Tournament: t,
 			Count:      count,
 		})
+	}
+
+	data := struct {
+		Lang        string
+		Tournaments []TournamentWithCount
+	}{
+		Lang:        GetLanguageFromContext(r.Context()),
+		Tournaments: tournamentData,
 	}
 
 	if err := app.templates.ExecuteTemplate(w, "admin-tournaments.html", data); err != nil {
@@ -914,9 +986,11 @@ func (app *WebApp) AdminTournamentHistoryHandler(w http.ResponseWriter, r *http.
 	})
 
 	data := struct {
+		Lang string
 		Tournament *model.Tournament
 		History    []*model.Tournament
 	}{
+		Lang: GetLanguageFromContext(r.Context()),
 		Tournament: tournament,
 		History:    history,
 	}
@@ -928,8 +1002,13 @@ func (app *WebApp) AdminTournamentHistoryHandler(w http.ResponseWriter, r *http.
 }
 
 func (app *WebApp) NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Lang string
+	}{
+		Lang: GetLanguageFromContext(r.Context()),
+	}
 	w.WriteHeader(http.StatusNotFound)
-	if err := app.templates.ExecuteTemplate(w, "404.html", nil); err != nil {
+	if err := app.templates.ExecuteTemplate(w, "404.html", data); err != nil {
 		log.Printf("Template execution error: %v", err)
 		http.Error(w, "404 - Page Not Found", http.StatusNotFound)
 	}
@@ -941,6 +1020,26 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		log.Printf("%s %s %s", r.Method, r.URL.Path, r.RemoteAddr)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func LanguageMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lang := r.URL.Query().Get("lang")
+		if lang == "" {
+			lang = defaultLang
+		}
+
+		ctx := context.WithValue(r.Context(), langContextKey, lang)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func GetLanguageFromContext(ctx context.Context) string {
+	lang, ok := ctx.Value(langContextKey).(string)
+	if ok && lang != "" {
+		return lang
+	}
+	return defaultLang
 }
 
 func (app *WebApp) lastSync() string {

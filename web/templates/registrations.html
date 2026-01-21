@@ -1,30 +1,34 @@
 <!doctype html>
 <html>
     <head>
-        <title>Registrations</title>
+        <title>{{T "registrations.title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
         <script src="/table-filters.js"></script>
     </head>
     <body class="page-table">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/tournaments">Tournaments</a>
-                    <a href="/registrations" class="active">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}" class="active">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
-            <h1>Registrations</h1>
+            <h1>{{T "registrations.title" .Lang}}</h1>
             <p class="sync-info">
                 <span class="sync-indicator" id="sync-indicator"></span>
                 <span id="sync-text">Last synced: {{ .LastSync }}</span>
@@ -33,30 +37,30 @@
             <div class="filters-container">
                 <div class="filters-row">
                     <div class="filter-item-wide">
-                        <label class="filter-label">Search</label>
-                        <input type="text" id="filter-search" class="filter-input" placeholder="Tournament name...">
+                        <label class="filter-label">{{T "filter.search" .Lang}}</label>
+                        <input type="text" id="filter-search" class="filter-input" placeholder="{{T "filter.search_placeholder" .Lang}}">
                     </div>
 
                     <div class="filter-item-wide">
-                        <label class="filter-label">Series</label>
+                        <label class="filter-label">{{T "filter.series" .Lang}}</label>
                         <select id="filter-series-dropdown" class="filter-select-small" onchange="addSeriesFilter()">
-                            <option value="">Select series...</option>
+                            <option value="">{{T "filter.series_placeholder" .Lang}}</option>
                         </select>
                         <div class="filter-tags" id="series-tags"></div>
                     </div>
 
                     <div class="filter-item">
-                        <label class="filter-label">Status</label>
+                        <label class="filter-label">{{T "tournament.status" .Lang}}</label>
                         <select id="filter-status" class="filter-select">
-                            <option value="all">All</option>
-                            <option value="open">Open</option>
-                            <option value="upcoming">Upcoming</option>
+                            <option value="all">{{T "filter.all" .Lang}}</option>
+                            <option value="open">{{T "registrations.open" .Lang}}</option>
+                            <option value="upcoming">{{T "registrations.upcoming" .Lang}}</option>
                         </select>
                     </div>
 
                     <div class="filter-item">
                         <label class="filter-label">&nbsp;</label>
-                        <button id="reset-filters" class="filter-reset-btn">Reset All</button>
+                        <button id="reset-filters" class="filter-reset-btn">{{T "filter.reset_all" .Lang}}</button>
                     </div>
                 </div>
             </div>
@@ -70,21 +74,21 @@
                         {{template "date-range-with-time" (dict "Start" .RegistrationStart "End" .RegistrationEnd)}}
                         <div class="registration-status-text">
                             {{if .ClosesToday}}
-                            <span class="closes-today-text">Closes Today {{.RegistrationEnd.Format "15:04"}}</span>
+                            <span class="closes-today-text">{{T "registrations.closes_today" $.Lang}} {{.RegistrationEnd.Format "15:04"}}</span>
                             {{else if .ClosesTomorrow}}
-                            <span class="closes-tomorrow-text">Closes Tomorrow {{.RegistrationEnd.Format "15:04"}}</span>
+                            <span class="closes-tomorrow-text">{{T "registrations.closes_tomorrow" $.Lang}} {{.RegistrationEnd.Format "15:04"}}</span>
                             {{else if gt .DaysLeft 2}}
-                            <span class="days-left-text">{{.DaysLeft}} Days Left</span>
+                            <span class="days-left-text">{{TArgs "registrations.days_left" $.Lang .DaysLeft}}</span>
                             {{end}}
                         </div>
                     </td>
                     <td>
-                        <a href="/tournament/{{.TournamentId}}">{{.TournamentTitle}}</a>
+                        <a href="/tournament/{{.TournamentId}}?lang={{$.Lang}}">{{.TournamentTitle}}</a>
                         <div class="registration-phase-name">{{.PhaseTitle}}</div>
                     </td>
                     <td>
                         <div class="badges-cell">
-                            <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.TournamentId}}" target="_blank" class="info-badge registration-open-badge">Registration Open <span class="link-icon">↗</span></a>
+                            <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.TournamentId}}" target="_blank" class="info-badge registration-open-badge">{{T "tournaments.registration_open" $.Lang}} <span class="link-icon">↗</span></a>
                         </div>
                     </td>
                 </tr>
@@ -93,7 +97,7 @@
                 <tr class="registration-divider">
                     <td colspan="3">
                         <div class="divider-line"></div>
-                        <div class="divider-text">Upcoming Registrations</div>
+                        <div class="divider-text">{{T "registrations.upcoming" .Lang}}</div>
                     </td>
                 </tr>
                 {{end}}
@@ -103,16 +107,16 @@
                         {{template "date-range-with-time" (dict "Start" .RegistrationStart "End" .RegistrationEnd)}}
                         <div class="registration-status-text">
                             {{if .OpensToday}}
-                            <span class="opens-today-text">Opens Today {{.RegistrationStart.Format "15:04"}}</span>
+                            <span class="opens-today-text">{{T "registrations.opens_today" $.Lang}} {{.RegistrationStart.Format "15:04"}}</span>
                             {{else if .OpensTomorrow}}
-                            <span class="opens-tomorrow-text">Opens Tomorrow {{.RegistrationStart.Format "15:04"}}</span>
+                            <span class="opens-tomorrow-text">{{T "registrations.opens_tomorrow" $.Lang}} {{.RegistrationStart.Format "15:04"}}</span>
                             {{else if gt .OpensInDays 0}}
-                            <span class="opens-in-days-text">Opens in {{.OpensInDays}} Days</span>
+                            <span class="opens-in-days-text">{{TArgs "registrations.opens_in_days" $.Lang .OpensInDays}}</span>
                             {{end}}
                         </div>
                     </td>
                     <td>
-                        <a href="/tournament/{{.TournamentId}}">{{.TournamentTitle}}</a>
+                        <a href="/tournament/{{.TournamentId}}?lang={{$.Lang}}">{{.TournamentTitle}}</a>
                         <div class="registration-phase-name">{{.PhaseTitle}}</div>
                     </td>
                     <td>
@@ -122,7 +126,7 @@
                 {{if not (or .Open .Upcoming)}}
                 <tr>
                     <td colspan="3" class="empty-state">
-                        No open or upcoming registrations found.
+                        {{T "registrations.empty" .Lang}}
                     </td>
                 </tr>
                 {{end}}
@@ -135,6 +139,16 @@
                 document.querySelector('.nav-links').classList.toggle('mobile-open');
                 document.querySelector('.nav-actions').classList.toggle('mobile-open');
             }
+
+            // Translations for sync time
+            const i18n = {
+                justNow: '{{T "time.just_now" .Lang}}',
+                minuteAgo: '{{T "time.minute_ago" .Lang}}',
+                minutesAgo: '{{T "time.minutes_ago" .Lang}}',
+                hourAgo: '{{T "time.hour_ago" .Lang}}',
+                hoursAgo: '{{T "time.hours_ago" .Lang}}',
+                dataUpdated: '{{T "time.data_updated" .Lang}}'
+            };
 
             // Sync time display
             function updateSyncTime() {
@@ -152,26 +166,26 @@
 
                 let relativeText;
                 if (diffMins < 1) {
-                    relativeText = 'just now';
+                    relativeText = i18n.justNow;
                     syncIndicator.className = 'sync-indicator fresh';
                 } else if (diffMins === 1) {
-                    relativeText = '1 minute ago';
+                    relativeText = i18n.minuteAgo;
                     syncIndicator.className = 'sync-indicator fresh';
                 } else if (diffMins < 60) {
-                    relativeText = diffMins + ' minutes ago';
+                    relativeText = i18n.minutesAgo.replace('{0}', diffMins);
                     syncIndicator.className = diffMins < 30 ? 'sync-indicator fresh' : 'sync-indicator recent';
                 } else if (diffHours === 1) {
-                    relativeText = '1 hour ago';
+                    relativeText = i18n.hourAgo;
                     syncIndicator.className = 'sync-indicator recent';
                 } else if (diffHours < 24) {
-                    relativeText = diffHours + ' hours ago';
+                    relativeText = i18n.hoursAgo.replace('{0}', diffHours);
                     syncIndicator.className = 'sync-indicator stale';
                 } else {
                     relativeText = syncDate.toLocaleDateString();
                     syncIndicator.className = 'sync-indicator stale';
                 }
 
-                syncTextEl.textContent = 'Data from ' + relativeText;
+                syncTextEl.textContent = i18n.dataUpdated.replace('{0}', relativeText);
             }
 
             // Initialize table filters
@@ -267,7 +281,7 @@
                     document.getElementById('filter-search').value = '';
 
                     // Clear tags
-                    document.getElementById('series-tags').innerHTML = '';
+                    document.getElementById('series-tags').textContent = '';
 
                     // Restore all options to series dropdown
                     const seriesDropdown = document.getElementById('filter-series-dropdown');
@@ -292,6 +306,19 @@
                 });
             });
 
+            // Safe helper to create filter tags without innerHTML
+            function createFilterTag(displayText, onRemove) {
+                const tag = document.createElement('span');
+                tag.className = 'filter-tag';
+                tag.appendChild(document.createTextNode(displayText + ' '));
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = '×';
+                btn.addEventListener('click', onRemove);
+                tag.appendChild(btn);
+                return tag;
+            }
+
             function addSeriesFilter() {
                 const dropdown = document.getElementById('filter-series-dropdown');
                 const selectedOption = dropdown.options[dropdown.selectedIndex];
@@ -300,9 +327,7 @@
                 if (value && !selectedSeries.has(value)) {
                     selectedSeries.add(value);
                     const tagsDiv = document.getElementById('series-tags');
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
-                    tag.innerHTML = `${value} <button type="button" onclick="removeSeriesFilter('${value}')">×</button>`;
+                    const tag = createFilterTag(value, () => removeSeriesFilter(value));
                     tagsDiv.appendChild(tag);
 
                     // Remove the option from dropdown
@@ -314,7 +339,7 @@
 
             function removeSeriesFilter(value) {
                 selectedSeries.delete(value);
-                updateTagDisplay('series-tags', selectedSeries, 'removeSeriesFilter');
+                updateTagDisplay('series-tags', selectedSeries, removeSeriesFilter);
 
                 // Add the option back to dropdown
                 const dropdown = document.getElementById('filter-series-dropdown');
@@ -336,13 +361,11 @@
                 tableFilter.setFilterValue('series', true);
             }
 
-            function updateTagDisplay(tagsDivId, selectedSet, removeFnName) {
+            function updateTagDisplay(tagsDivId, selectedSet, removeFn) {
                 const tagsDiv = document.getElementById(tagsDivId);
-                tagsDiv.innerHTML = '';
+                tagsDiv.textContent = '';
                 selectedSet.forEach(value => {
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
-                    tag.innerHTML = `${value} <button type="button" onclick="${removeFnName}('${value}')">×</button>`;
+                    const tag = createFilterTag(value, () => removeFn(value));
                     tagsDiv.appendChild(tag);
                 });
             }

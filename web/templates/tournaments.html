@@ -1,30 +1,34 @@
 <!doctype html>
 <html>
     <head>
-        <title>Tournaments</title>
+        <title>{{T "tournaments.title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
         <script src="/table-filters.js"></script>
     </head>
     <body class="page-table">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/tournaments" class="active">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}" class="active">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
-            <h1>Tournaments</h1>
+            <h1>{{T "tournaments.title" .Lang}}</h1>
             <p class="sync-info">
                 <span class="sync-indicator" id="sync-indicator"></span>
                 <span id="sync-text">Last synced: {{ .LastSync }}</span>
@@ -33,61 +37,61 @@
             <div class="filters-container">
                 <div class="filters-row">
                     <div class="filter-item-wide">
-                        <label class="filter-label">Search</label>
-                        <input type="text" id="filter-search" class="filter-input" placeholder="Tournament name...">
+                        <label class="filter-label">{{T "filter.search" .Lang}}</label>
+                        <input type="text" id="filter-search" class="filter-input" placeholder="{{T "filter.search_placeholder" .Lang}}">
                     </div>
 
                     <div class="filter-item-wide">
-                        <label class="filter-label">Series</label>
+                        <label class="filter-label">{{T "filter.series" .Lang}}</label>
                         <select id="filter-series-dropdown" class="filter-select-small" onchange="addSeriesFilter()">
-                            <option value="">Select series...</option>
+                            <option value="">{{T "filter.series_placeholder" .Lang}}</option>
                         </select>
                         <div class="filter-tags" id="series-tags"></div>
                     </div>
 
                     <div class="filter-item-wide">
-                        <label class="filter-label">PDGA Tier</label>
+                        <label class="filter-label">{{T "filter.pdga_tier" .Lang}}</label>
                         <select id="filter-pdga-dropdown" class="filter-select-small" onchange="addPdgaFilter()">
-                            <option value="">Select tier...</option>
+                            <option value="">{{T "filter.pdga_tier_placeholder" .Lang}}</option>
                         </select>
                         <div class="filter-tags" id="pdga-tags"></div>
                     </div>
 
                     <div class="filter-item-wide">
-                        <label class="filter-label">Month</label>
+                        <label class="filter-label">{{T "filter.month" .Lang}}</label>
                         <select id="filter-month-dropdown" class="filter-select-small" onchange="addMonthFilter()">
-                            <option value="">Select month...</option>
+                            <option value="">{{T "filter.month_placeholder" .Lang}}</option>
                         </select>
                         <div class="filter-tags" id="month-tags"></div>
                     </div>
 
                     <div class="filter-item">
-                        <label class="filter-label">Year</label>
+                        <label class="filter-label">{{T "filter.year" .Lang}}</label>
                         <select id="filter-year" class="filter-select">
-                            <option value="all">All</option>
+                            <option value="all">{{T "filter.all" .Lang}}</option>
                         </select>
                     </div>
 
                     <div class="filter-item">
-                        <label class="filter-label">D-Rating</label>
+                        <label class="filter-label">{{T "filter.drating" .Lang}}</label>
                         <select id="filter-drating" class="filter-select">
-                            <option value="all">All</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
+                            <option value="all">{{T "filter.all" .Lang}}</option>
+                            <option value="yes">{{T "filter.yes" .Lang}}</option>
+                            <option value="no">{{T "filter.no" .Lang}}</option>
                         </select>
                     </div>
 
                     <div class="filter-item">
-                        <label class="filter-label">Sort</label>
+                        <label class="filter-label">{{T "filter.sort" .Lang}}</label>
                         <select id="filter-sort" class="filter-select">
-                            <option value="asc">Earliest First</option>
-                            <option value="desc">Latest First</option>
+                            <option value="asc">{{T "filter.earliest_first" .Lang}}</option>
+                            <option value="desc">{{T "filter.latest_first" .Lang}}</option>
                         </select>
                     </div>
 
                     <div class="filter-item">
                         <label class="filter-label">&nbsp;</label>
-                        <button id="reset-filters" class="filter-reset-btn">Reset All</button>
+                        <button id="reset-filters" class="filter-reset-btn">{{T "filter.reset_all" .Lang}}</button>
                     </div>
                 </div>
             </div>
@@ -112,7 +116,7 @@
                             {{$tournament := .}}
                             <div class="reg-status-list">
                                 {{if .HasActiveRegistration}}
-                                <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.Id}}" target="_blank" class="reg-item open">{{if and .HasMultiplePhases .ActiveRegistrationTitle}}{{.ActiveRegistrationTitle}} · {{end}}Registration Open ↗</a>
+                                <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.Id}}" target="_blank" class="reg-item open">{{if and .HasMultiplePhases .ActiveRegistrationTitle}}{{.ActiveRegistrationTitle}} · {{end}}{{T "tournaments.registration_open" $.Lang}} ↗</a>
                                 {{end}}
                                 {{range .UpcomingRegistrations}}
                                 <span class="reg-item {{if .OpensToday}}today{{else if .OpensTomorrow}}tomorrow{{end}}">{{if $tournament.HasMultiplePhases}}{{if .Title}}{{.Title}} · {{end}}{{end}}Reg. {{if .OpensToday}}opens today {{.StartTime.Format "15:04"}}{{else if .OpensTomorrow}}opens tomorrow {{.StartTime.Format "15:04"}}{{else}}opens in {{.OpensInDays}}d{{end}}</span>
@@ -123,7 +127,7 @@
                             </div>
                         </td>
                         <td>
-                            <a href="/tournament/{{.Id}}">{{.Title}}</a>
+                            <a href="/tournament/{{.Id}}?lang={{$.Lang}}">{{.Title}}</a>
                             {{if .Localtion}}
                             <div class="tournament-location">
                                 {{if .GeoLocation}}
@@ -164,6 +168,16 @@
                 document.querySelector('.nav-actions').classList.toggle('mobile-open');
             }
 
+            // Translations for sync time
+            const i18n = {
+                justNow: '{{T "time.just_now" .Lang}}',
+                minuteAgo: '{{T "time.minute_ago" .Lang}}',
+                minutesAgo: '{{T "time.minutes_ago" .Lang}}',
+                hourAgo: '{{T "time.hour_ago" .Lang}}',
+                hoursAgo: '{{T "time.hours_ago" .Lang}}',
+                dataUpdated: '{{T "time.data_updated" .Lang}}'
+            };
+
             // Sync time display
             function updateSyncTime() {
                 const syncTimeEl = document.getElementById('sync-time');
@@ -180,26 +194,26 @@
 
                 let relativeText;
                 if (diffMins < 1) {
-                    relativeText = 'just now';
+                    relativeText = i18n.justNow;
                     syncIndicator.className = 'sync-indicator fresh';
                 } else if (diffMins === 1) {
-                    relativeText = '1 minute ago';
+                    relativeText = i18n.minuteAgo;
                     syncIndicator.className = 'sync-indicator fresh';
                 } else if (diffMins < 60) {
-                    relativeText = diffMins + ' minutes ago';
+                    relativeText = i18n.minutesAgo.replace('{0}', diffMins);
                     syncIndicator.className = diffMins < 30 ? 'sync-indicator fresh' : 'sync-indicator recent';
                 } else if (diffHours === 1) {
-                    relativeText = '1 hour ago';
+                    relativeText = i18n.hourAgo;
                     syncIndicator.className = 'sync-indicator recent';
                 } else if (diffHours < 24) {
-                    relativeText = diffHours + ' hours ago';
+                    relativeText = i18n.hoursAgo.replace('{0}', diffHours);
                     syncIndicator.className = 'sync-indicator stale';
                 } else {
                     relativeText = syncDate.toLocaleDateString();
                     syncIndicator.className = 'sync-indicator stale';
                 }
 
-                syncTextEl.textContent = 'Data from ' + relativeText;
+                syncTextEl.textContent = i18n.dataUpdated.replace('{0}', relativeText);
             }
 
             // Initialize table filters
@@ -394,9 +408,9 @@
                     document.getElementById('filter-search').value = '';
 
                     // Clear tags
-                    document.getElementById('series-tags').innerHTML = '';
-                    document.getElementById('pdga-tags').innerHTML = '';
-                    document.getElementById('month-tags').innerHTML = '';
+                    document.getElementById('series-tags').textContent = '';
+                    document.getElementById('pdga-tags').textContent = '';
+                    document.getElementById('month-tags').textContent = '';
 
                     // Restore all options to series dropdown
                     const seriesDropdown = document.getElementById('filter-series-dropdown');
@@ -452,6 +466,19 @@
                 });
             });
 
+            // Safe helper to create filter tags without innerHTML
+            function createFilterTag(displayText, onRemove) {
+                const tag = document.createElement('span');
+                tag.className = 'filter-tag';
+                tag.appendChild(document.createTextNode(displayText + ' '));
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = '×';
+                btn.addEventListener('click', onRemove);
+                tag.appendChild(btn);
+                return tag;
+            }
+
             function addSeriesFilter() {
                 const dropdown = document.getElementById('filter-series-dropdown');
                 const selectedOption = dropdown.options[dropdown.selectedIndex];
@@ -460,9 +487,7 @@
                 if (value && !selectedSeries.has(value)) {
                     selectedSeries.add(value);
                     const tagsDiv = document.getElementById('series-tags');
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
-                    tag.innerHTML = `${value} <button type="button" onclick="removeSeriesFilter('${value}')">×</button>`;
+                    const tag = createFilterTag(value, () => removeSeriesFilter(value));
                     tagsDiv.appendChild(tag);
 
                     // Remove the option from dropdown
@@ -474,7 +499,7 @@
 
             function removeSeriesFilter(value) {
                 selectedSeries.delete(value);
-                updateTagDisplay('series-tags', selectedSeries, 'removeSeriesFilter');
+                updateTagDisplay('series-tags', selectedSeries, removeSeriesFilter);
 
                 // Add the option back to dropdown
                 const dropdown = document.getElementById('filter-series-dropdown');
@@ -504,9 +529,7 @@
                 if (value && !selectedPdga.has(value)) {
                     selectedPdga.add(value);
                     const tagsDiv = document.getElementById('pdga-tags');
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
-                    tag.innerHTML = `${value}-Tier <button type="button" onclick="removePdgaFilter('${value}')">×</button>`;
+                    const tag = createFilterTag(value + '-Tier', () => removePdgaFilter(value));
                     tagsDiv.appendChild(tag);
 
                     // Remove the option from dropdown
@@ -518,7 +541,7 @@
 
             function removePdgaFilter(value) {
                 selectedPdga.delete(value);
-                updateTagDisplay('pdga-tags', selectedPdga, 'removePdgaFilter');
+                updateTagDisplay('pdga-tags', selectedPdga, removePdgaFilter);
 
                 // Add the option back to dropdown
                 const dropdown = document.getElementById('filter-pdga-dropdown');
@@ -548,10 +571,8 @@
                 if (value && !selectedMonths.has(value)) {
                     selectedMonths.add(value);
                     const tagsDiv = document.getElementById('month-tags');
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
                     const display = monthsData.get(value);
-                    tag.innerHTML = `${display} <button type="button" onclick="removeMonthFilter('${value}')">×</button>`;
+                    const tag = createFilterTag(display, () => removeMonthFilter(value));
                     tagsDiv.appendChild(tag);
 
                     // Remove the option from dropdown
@@ -563,7 +584,7 @@
 
             function removeMonthFilter(value) {
                 selectedMonths.delete(value);
-                updateTagDisplay('month-tags', selectedMonths, 'removeMonthFilter');
+                updateTagDisplay('month-tags', selectedMonths, removeMonthFilter);
 
                 // Add the option back to dropdown
                 const dropdown = document.getElementById('filter-month-dropdown');
@@ -586,16 +607,14 @@
                 tableFilter.setFilterValue('month', true);
             }
 
-            function updateTagDisplay(tagsDivId, selectedSet, removeFnName) {
+            function updateTagDisplay(tagsDivId, selectedSet, removeFn) {
                 const tagsDiv = document.getElementById(tagsDivId);
-                tagsDiv.innerHTML = '';
+                tagsDiv.textContent = '';
                 selectedSet.forEach(value => {
-                    const tag = document.createElement('span');
-                    tag.className = 'filter-tag';
                     let display = value;
                     if (tagsDivId === 'pdga-tags') display = value + '-Tier';
                     if (tagsDivId === 'month-tags') display = monthsData.get(value);
-                    tag.innerHTML = `${display} <button type="button" onclick="${removeFnName}('${value}')">×</button>`;
+                    const tag = createFilterTag(display, () => removeFn(value));
                     tagsDiv.appendChild(tag);
                 });
             }

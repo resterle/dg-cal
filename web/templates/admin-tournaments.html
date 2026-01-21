@@ -3,43 +3,47 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin - Tournaments</title>
+        <title>{{T "nav.admin" .Lang}} - {{T "admin.tournaments" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-table admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal Admin</span>
+                    <span class="brand-text">{{T "app.name" .Lang}} {{T "nav.admin" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/admin">Calendars</a>
-                    <a href="/admin/tournaments" class="active">Tournaments</a>
+                    <a href="/admin?lang={{.Lang}}">{{T "admin.calendars" .Lang}}</a>
+                    <a href="/admin/tournaments?lang={{.Lang}}" class="active">{{T "admin.tournaments" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/">Exit Admin</a>
+                    <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
-            <h1>Tournament Administration</h1>
+            <h1>{{T "admin.tournament_admin" .Lang}}</h1>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Start Date</th>
-                            <th>Updated At</th>
-                            <th>Changes</th>
-                            <th>Actions</th>
+                            <th>{{T "admin.id" .Lang}}</th>
+                            <th>{{T "admin.title_column" .Lang}}</th>
+                            <th>{{T "tournament.status" .Lang}}</th>
+                            <th>{{T "admin.start_date" .Lang}}</th>
+                            <th>{{T "admin.updated_at" .Lang}}</th>
+                            <th>{{T "admin.changes" .Lang}}</th>
+                            <th>{{T "admin.actions" .Lang}}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {{range .}}
+                        {{range .Tournaments}}
                         <tr>
                             <td>{{.Tournament.Id}}</td>
                             <td><strong>{{.Tournament.Title}}</strong></td>
@@ -49,9 +53,9 @@
                             <td>{{.Count}}</td>
                             <td>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <a href="/tournament/{{.Tournament.Id}}" class="button-small">View</a>
+                                    <a href="/tournament/{{.Tournament.Id}}?lang={{$.Lang}}" class="button-small">{{T "admin.view" $.Lang}}</a>
                                     {{if gt .Count 0}}
-                                    <a href="/admin/tournament/{{.Tournament.Id}}/history" class="button-small">History</a>
+                                    <a href="/admin/tournament/{{.Tournament.Id}}/history?lang={{$.Lang}}" class="button-small">{{T "admin.history" $.Lang}}</a>
                                     {{end}}
                                 </div>
                             </td>
@@ -59,7 +63,7 @@
                         {{else}}
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 40px;">
-                                No tournaments found.
+                                {{T "admin.no_tournaments" .Lang}}
                             </td>
                         </tr>
                         {{end}}

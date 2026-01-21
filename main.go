@@ -109,7 +109,8 @@ func main() {
 	}
 
 	fmt.Printf("Web service starting on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, web.LoggingMiddleware(http.DefaultServeMux)))
+	withLogging := web.LoggingMiddleware(http.DefaultServeMux)
+	log.Fatal(http.ListenAndServe(":"+port, web.LanguageMiddleware(withLogging)))
 
 }
 

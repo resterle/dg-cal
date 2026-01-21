@@ -47,7 +47,7 @@ func (s *IcsService) CreateIcs(id string) (string, error) {
 	}
 
 	icsCal := ics.NewCalendar()
-	icsCal.SetProductId("dg-cal")
+	icsCal.SetProductId("dg-cal v0.1")
 	icsCal.SetMethod(ics.MethodPublish)
 	icsCal.SetName(calendar.Title)
 	for _, tournament := range tournaments {

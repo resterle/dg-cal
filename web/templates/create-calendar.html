@@ -3,37 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Calendar</title>
+    <title>{{T "nav.create_calendar" .Lang}}</title>
     <link rel="stylesheet" href="/common.css">
 </head>
 <body class="page-form-small">
     <nav class="top-nav">
         <div class="nav-container">
-            <a href="/" class="nav-brand">
+            <a href="/?lang={{.Lang}}" class="nav-brand">
                 <span class="logo">🥏➡️🗓️</span>
-                <span class="brand-text">DG Cal</span>
+                <span class="brand-text">{{T "app.name" .Lang}}</span>
             </a>
             <div class="nav-links">
-                <a href="/">Tournaments</a>
-                <a href="/registrations">Registrations</a>
+                <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
             </div>
             <div class="nav-actions">
-                <a href="/calendar/edit">Access Calendar</a>
-                <a href="/calendar/new" class="primary">Create Calendar</a>
+                <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+            </div>
+            <div class="lang-switcher">
+                <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
             </div>
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
         </div>
     </nav>
     <div class="main-content">
         <div class="container">
-        <h1>Create a New Calendar</h1>
+        <h1>{{T "calendar.create_title" .Lang}}</h1>
         <p class="description">
-            Create a personalized tournament calendar. You'll receive a unique access code to manage your calendar.
+            {{T "calendar.create_desc" .Lang}}
         </p>
         <form method="POST" action="/calendar/create">
-            <label for="title">Calendar Title:</label>
-            <input type="text" id="title" name="title" placeholder="Enter a title for your calendar" required>
-            <button type="submit">Create Calendar</button>
+            <label for="title">{{T "calendar.title_label" .Lang}}</label>
+            <input type="text" id="title" name="title" placeholder="{{T "calendar.title_placeholder" .Lang}}" required>
+            <button type="submit">{{T "calendar.create_button" .Lang}}</button>
         </form>
     </div>
     </div>

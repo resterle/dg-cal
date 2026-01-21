@@ -3,38 +3,41 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Access Your Calendar</title>
+        <title>{{T "calendar.access_title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-form-small">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
             <div class="container">
-            <h1>Access Your Calendar</h1>
+            <h1>{{T "calendar.access_title" .Lang}}</h1>
             <p class="description">
-                Enter your calendar access code to manage your calendar settings.
-                Your access code consists of 4 groups of 4 characters.
+                {{T "calendar.access_format_desc" .Lang}}
             </p>
 
             <div class="info-box">
-                <p><strong>Format:</strong> xxxx-xxxx-xxxx-xxxx</p>
-                <p><strong>Example:</strong> a3b5-c7d9-e2f4-g6h8</p>
+                <p><strong>{{T "calendar.format" .Lang}}</strong> xxxx-xxxx-xxxx-xxxx</p>
+                <p><strong>{{T "calendar.example" .Lang}}</strong> a3b5-c7d9-e2f4-g6h8</p>
             </div>
 
             <form method="POST" action="/calendar/edit" id="accessForm">
@@ -83,11 +86,11 @@
                 <input type="hidden" name="editId" id="editId" />
 
                 <p class="error-message" id="errorMessage">
-                    Please enter all 4 groups of characters.
+                    {{T "calendar.error_enter_all" .Lang}}
                 </p>
 
                 <button type="submit" id="submitBtn" disabled>
-                    Access Calendar
+                    {{T "calendar.access_button" .Lang}}
                 </button>
             </form>
         </div>

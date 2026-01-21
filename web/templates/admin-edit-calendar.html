@@ -3,22 +3,26 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin - Edit Calendar</title>
+        <title>{{T "nav.admin" .Lang}} - {{T "calendar.edit_title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-form-small admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal Admin</span>
+                    <span class="brand-text">{{T "app.name" .Lang}} {{T "nav.admin" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/admin" class="active">Calendars</a>
-                    <a href="/admin/tournaments">Tournaments</a>
+                    <a href="/admin?lang={{.Lang}}" class="active">{{T "admin.calendars" .Lang}}</a>
+                    <a href="/admin/tournaments?lang={{.Lang}}">{{T "admin.tournaments" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/">Exit Admin</a>
+                    <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
@@ -26,31 +30,31 @@
         <div class="main-content">
             <div class="container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h1>Edit Calendar (Admin)</h1>
-                    <a href="/admin" class="button-small">← Back to Admin</a>
+                    <h1>{{T "admin.edit_calendar" .Lang}}</h1>
+                    <a href="/admin?lang={{.Lang}}" class="button-small">← {{T "admin.back_to_admin" .Lang}}</a>
                 </div>
 
                 <table style="width: 100%; margin-bottom: 30px; border-collapse: collapse;">
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 12px; font-weight: 600; width: 30%;">Calendar ID</td>
+                        <td style="padding: 12px; font-weight: 600; width: 30%;">{{T "admin.calendar_id" .Lang}}</td>
                         <td style="padding: 12px;"><code>{{.Calendar.Id}}</code></td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 12px; font-weight: 600;">Created At</td>
+                        <td style="padding: 12px; font-weight: 600;">{{T "admin.created_at" .Lang}}</td>
                         <td style="padding: 12px;">{{.Calendar.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 12px; font-weight: 600;">Updated At</td>
+                        <td style="padding: 12px; font-weight: 600;">{{T "admin.updated_at" .Lang}}</td>
                         <td style="padding: 12px;">{{.Calendar.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 12px; font-weight: 600;">Retrieved At</td>
-                        <td style="padding: 12px;">{{if .Calendar.RetrievedAt}}{{.Calendar.RetrievedAt.Format "2006-01-02 15:04:05"}}{{else}}<em>Never</em>{{end}}</td>
+                        <td style="padding: 12px; font-weight: 600;">{{T "admin.retrieved_at" .Lang}}</td>
+                        <td style="padding: 12px;">{{if .Calendar.RetrievedAt}}{{.Calendar.RetrievedAt.Format "2006-01-02 15:04:05"}}{{else}}<em>{{T "admin.never" .Lang}}</em>{{end}}</td>
                     </tr>
                 </table>
 
                 <form method="POST" action="/admin/calendar/{{.Calendar.Id}}" id="editForm">
-                    <label for="title">Title:</label>
+                    <label for="title">{{T "admin.title_column" .Lang}}:</label>
                     <input
                         type="text"
                         id="title"
@@ -59,15 +63,15 @@
                         required
                     />
 
-                    <label for="tournaments">Tournament IDs (comma-separated):</label>
+                    <label for="tournaments">{{T "admin.tournament_ids" .Lang}}</label>
                     <textarea
                         id="tournaments"
                         name="tournaments"
                         rows="3"
-                        placeholder="e.g., 123, 456, 789"
+                        placeholder="{{T "admin.tournament_ids_placeholder" .Lang}}"
                     >{{.TournamentIds}}</textarea>
 
-                    <label>Series:</label>
+                    <label>{{T "tournament.series" .Lang}}:</label>
                     <div id="seriesTags" style="margin-bottom: 10px;">
                         {{range .Calendar.Config.Series}}
                         <span class="series-tag">
@@ -83,7 +87,7 @@
                     </div>
                     <div class="series-input-group">
                         <select id="seriesDropdown">
-                            <option value="">-- Select a series --</option>
+                            <option value="">{{T "admin.select_series" .Lang}}</option>
                             {{range .Series}}
                             <option value="{{.}}">{{.}}</option>
                             {{end}}
@@ -93,11 +97,11 @@
                             class="add-series-btn"
                             onclick="addSeries()"
                         >
-                            Add Series
+                            {{T "admin.add_series" .Lang}}
                         </button>
                     </div>
 
-                    <button type="submit">Save Changes</button>
+                    <button type="submit">{{T "calendar.save_changes" .Lang}}</button>
                 </form>
             </div>
         </div>
@@ -123,6 +127,19 @@
                 });
             });
 
+            // Safe helper to create series tags without innerHTML
+            function createSeriesTag(series, onRemove) {
+                const tag = document.createElement("span");
+                tag.className = "series-tag";
+                tag.appendChild(document.createTextNode(series + " "));
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = "×";
+                btn.addEventListener("click", onRemove);
+                tag.appendChild(btn);
+                return tag;
+            }
+
             function addSeries() {
                 const dropdown = document.getElementById("seriesDropdown");
                 const series = dropdown.value.trim();
@@ -130,9 +147,7 @@
                 if (series && !seriesSet.has(series)) {
                     seriesSet.add(series);
                     const tagsDiv = document.getElementById("seriesTags");
-                    const tag = document.createElement("span");
-                    tag.className = "series-tag";
-                    tag.innerHTML = `${escapeHtml(series)} <button type="button" onclick="removeSeries(this, '${escapeAttr(series)}')">×</button>`;
+                    const tag = createSeriesTag(series, function() { removeSeries(this.parentElement, series); });
                     tagsDiv.appendChild(tag);
 
                     // Add hidden input for form submission
@@ -147,23 +162,13 @@
                 }
             }
 
-            function removeSeries(button, series) {
+            function removeSeries(tagElement, series) {
                 seriesSet.delete(series);
-                button.parentElement.remove();
+                tagElement.remove();
                 const hiddenInput = document.getElementById(`series-${series.replace(/[^a-zA-Z0-9]/g, '_')}`);
                 if (hiddenInput) {
                     hiddenInput.remove();
                 }
-            }
-
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function escapeAttr(text) {
-                return text.replace(/'/g, "\\'");
             }
         </script>
     </body>

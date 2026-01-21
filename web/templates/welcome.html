@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>DG Cal - Disc Golf Calendar</title>
+        <title>{{T "app.name" .Lang}} - {{T "app.tagline" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
         <style>
             .welcome-hero {
@@ -136,17 +136,21 @@
     <body class="page-form-small">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/tournaments">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
@@ -154,28 +158,28 @@
         <div class="main-content">
             <div class="welcome-hero">
                 <div class="welcome-logo">🥏➡️🗓️</div>
-                <h1 class="welcome-title">Welcome to DG Cal</h1>
+                <h1 class="welcome-title">{{T "welcome.title" .Lang}}</h1>
                 <p class="welcome-subtitle">
-                    Your personal disc golf calendar. Browse tournaments, track registrations, and never miss an event.
+                    {{T "welcome.subtitle" .Lang}}
                 </p>
 
                 <div class="welcome-links">
-                    <a href="/tournaments" class="welcome-link">
+                    <a href="/tournaments?lang={{.Lang}}" class="welcome-link">
                         <span class="welcome-link-icon">🏆</span>
-                        <span class="welcome-link-title">Tournaments</span>
-                        <span class="welcome-link-description">Browse all upcoming disc golf tournaments</span>
+                        <span class="welcome-link-title">{{T "welcome.tournaments_title" .Lang}}</span>
+                        <span class="welcome-link-description">{{T "welcome.tournaments_desc" .Lang}}</span>
                     </a>
-                    <a href="/registrations" class="welcome-link">
+                    <a href="/registrations?lang={{.Lang}}" class="welcome-link">
                         <span class="welcome-link-icon">📝</span>
-                        <span class="welcome-link-title">Registrations</span>
-                        <span class="welcome-link-description">View open and upcoming registrations</span>
+                        <span class="welcome-link-title">{{T "welcome.registrations_title" .Lang}}</span>
+                        <span class="welcome-link-description">{{T "welcome.registrations_desc" .Lang}}</span>
                     </a>
                 </div>
 
                 <div class="welcome-footer">
                     <div class="welcome-footer-links">
-                        <a href="/calendar/new">Create Calendar</a>
-                        <a href="/calendar/edit">Access Existing Calendar</a>
+                        <a href="/calendar/new?lang={{.Lang}}">{{T "nav.create_calendar" .Lang}}</a>
+                        <a href="/calendar/edit?lang={{.Lang}}">{{T "welcome.access_existing" .Lang}}</a>
                     </div>
                 </div>
             </div>

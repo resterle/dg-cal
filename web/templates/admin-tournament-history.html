@@ -3,77 +3,81 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin - Tournament History</title>
+        <title>{{T "nav.admin" .Lang}} - {{T "admin.tournament_history" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-table admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal Admin</span>
+                    <span class="brand-text">{{T "app.name" .Lang}} {{T "nav.admin" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/admin">Calendars</a>
-                    <a href="/admin/tournaments" class="active">Tournaments</a>
+                    <a href="/admin?lang={{.Lang}}">{{T "admin.calendars" .Lang}}</a>
+                    <a href="/admin/tournaments?lang={{.Lang}}" class="active">{{T "admin.tournaments" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/">Exit Admin</a>
+                    <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1>Tournament History: {{.Tournament.Title}}</h1>
-                <a href="/admin/tournaments" class="button-small">← Back to Tournaments</a>
+                <h1>{{T "admin.tournament_history" .Lang}}: {{.Tournament.Title}}</h1>
+                <a href="/admin/tournaments?lang={{.Lang}}" class="button-small">← {{T "admin.back_to_tournaments" .Lang}}</a>
             </div>
 
             <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
-                <h2 style="margin-top: 0;">Current State</h2>
+                <h2 style="margin-top: 0;">{{T "admin.current_state" .Lang}}</h2>
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600; width: 20%;">ID</td>
+                        <td style="padding: 8px; font-weight: 600; width: 20%;">{{T "admin.id" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.Id}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">Title</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "admin.title_column" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.Title}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">Status</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "tournament.status" .Lang}}</td>
                         <td style="padding: 8px;"><span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span></td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">Location</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "tournament.location" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.Localtion}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">Start Date</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "admin.start_date" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.StartDate.Format "2006-01-02"}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">End Date</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "admin.end_date" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.EndDate.Format "2006-01-02"}}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">Last Updated</td>
+                        <td style="padding: 8px; font-weight: 600;">{{T "admin.last_updated" .Lang}}</td>
                         <td style="padding: 8px;">{{.Tournament.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
                     </tr>
                 </table>
             </div>
 
-            <h2>Change History ({{len .History}} changes)</h2>
+            <h2>{{TArgs "admin.change_history" .Lang (len .History)}}</h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Updated At</th>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Location</th>
+                            <th>{{T "admin.updated_at" .Lang}}</th>
+                            <th>{{T "admin.title_column" .Lang}}</th>
+                            <th>{{T "tournament.status" .Lang}}</th>
+                            <th>{{T "admin.start_date" .Lang}}</th>
+                            <th>{{T "admin.end_date" .Lang}}</th>
+                            <th>{{T "tournament.location" .Lang}}</th>
                             <th>Details</th>
                         </tr>
                     </thead>
@@ -88,15 +92,15 @@
                             <td>{{.Localtion}}</td>
                             <td>
                                 <details>
-                                    <summary style="cursor: pointer; color: #4caf50; font-weight: 500;">View Full Data</summary>
+                                    <summary style="cursor: pointer; color: #4caf50; font-weight: 500;">{{T "admin.view_full_data" $.Lang}}</summary>
                                     <div style="margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 4px;">
                                         <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                                             <tr style="border-bottom: 1px solid #ddd;">
-                                                <td style="padding: 4px; font-weight: 600;">Series</td>
+                                                <td style="padding: 4px; font-weight: 600;">{{T "tournament.series" $.Lang}}</td>
                                                 <td style="padding: 4px;">{{join .Series ", "}}</td>
                                             </tr>
                                             <tr style="border-bottom: 1px solid #ddd;">
-                                                <td style="padding: 4px; font-weight: 600;">PDGA Tier</td>
+                                                <td style="padding: 4px; font-weight: 600;">{{T "tournament.pdga_tier" $.Lang}}</td>
                                                 <td style="padding: 4px;">{{.PdgaTier}}</td>
                                             </tr>
                                             <tr style="border-bottom: 1px solid #ddd;">
@@ -104,16 +108,16 @@
                                                 <td style="padding: 4px;">{{.PdgaId}}</td>
                                             </tr>
                                             <tr style="border-bottom: 1px solid #ddd;">
-                                                <td style="padding: 4px; font-weight: 600;">D-Rating</td>
-                                                <td style="padding: 4px;">{{if .DRating}}Yes{{else}}No{{end}}</td>
+                                                <td style="padding: 4px; font-weight: 600;">{{T "tournament.drating" $.Lang}}</td>
+                                                <td style="padding: 4px;">{{if .DRating}}{{T "filter.yes" $.Lang}}{{else}}{{T "filter.no" $.Lang}}{{end}}</td>
                                             </tr>
                                             <tr style="border-bottom: 1px solid #ddd;">
-                                                <td style="padding: 4px; font-weight: 600;">Geo Location</td>
+                                                <td style="padding: 4px; font-weight: 600;">{{T "admin.geo_location" $.Lang}}</td>
                                                 <td style="padding: 4px;">{{.GeoLocation}}</td>
                                             </tr>
                                             {{if .Registrations}}
                                             <tr>
-                                                <td style="padding: 4px; font-weight: 600;">Registrations</td>
+                                                <td style="padding: 4px; font-weight: 600;">{{T "nav.registrations" $.Lang}}</td>
                                                 <td style="padding: 4px;">
                                                     {{range .Registrations}}
                                                     <div>{{.Title}}: {{.StartDate.Format "2006-01-02"}} - {{.EndDate.Format "2006-01-02"}}</div>
@@ -129,7 +133,7 @@
                         {{else}}
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 40px;">
-                                No history found.
+                                {{T "admin.no_history" .Lang}}
                             </td>
                         </tr>
                         {{end}}

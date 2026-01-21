@@ -3,23 +3,27 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{{.Title}} - Tournament Details</title>
+        <title>{{.Title}} - {{T "tournament.details" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
     </head>
     <body class="page-form-large">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
@@ -28,12 +32,12 @@
             <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 style="margin: 0;">{{.Title}}</h1>
-                <a href="/tournaments" class="button-small" id="back-button">← Back</a>
+                <a href="/tournaments?lang={{.Lang}}" class="button-small" id="back-button">← {{T "common.back" .Lang}}</a>
             </div>
 
             <div class="detail-grid">
                 <div class="detail-card">
-                    <h3>Location</h3>
+                    <h3>{{T "tournament.location" .Lang}}</h3>
                     <div class="value">{{.Localtion}}</div>
                 </div>
 
@@ -46,21 +50,21 @@
 
                 {{if .PdgaTier}}
                 <div class="detail-card">
-                    <h3>PDGA Tier</h3>
+                    <h3>{{T "tournament.pdga_tier" .Lang}}</h3>
                     <div class="value">{{.PdgaTier}}</div>
                 </div>
                 {{end}}
 
                 {{if .DRating}}
                 <div class="detail-card">
-                    <h3>D-Rating</h3>
-                    <div class="value">Available</div>
+                    <h3>{{T "tournament.drating" .Lang}}</h3>
+                    <div class="value">{{T "common.available" .Lang}}</div>
                 </div>
                 {{end}}
 
                 {{if .Series}}
                 <div class="detail-card">
-                    <h3>Series</h3>
+                    <h3>{{T "tournament.series" .Lang}}</h3>
                     <div class="value">
                         {{range $index, $series := .Series}}
                             {{if $index}}, {{end}}{{$series}}
@@ -72,18 +76,18 @@
 
             {{if .Registrations}}
             <div class="section">
-                <h2>Registration Phases</h2>
+                <h2>{{T "calendar.registration_phases" .Lang}}</h2>
                 <div class="registration-phases">
                     {{range .Registrations}}
                     <div class="phase-card">
                         <h4>{{.Title}}</h4>
                         <div class="phase-info">
                             <div class="phase-info-item">
-                                <label>Registration Opens</label>
+                                <label>{{T "tournament.registration_opens" $.Lang}}</label>
                                 <div class="value">{{.StartDate.Format "Jan 2, 2006 15:04"}}</div>
                             </div>
                             <div class="phase-info-item">
-                                <label>Registration Closes</label>
+                                <label>{{T "tournament.registration_closes" $.Lang}}</label>
                                 <div class="value">{{.EndDate.Format "Jan 2, 2006 15:04"}}</div>
                             </div>
                         </div>
@@ -94,18 +98,18 @@
             {{end}}
 
             <div class="section">
-                <h2>External Links</h2>
+                <h2>{{T "tournament.external_links" .Lang}}</h2>
                 <div class="external-links">
                     <a href="https://turniere.discgolf.de/index.php?p=events&sp=view&id={{.Id}}"
                        target="_blank"
                        class="tournament-link">
-                        View on turniere.discgolf.de →
+                        {{T "tournament.view_on_turniere" .Lang}} →
                     </a>
                     {{if .PdgaId}}
                     <a href="https://www.pdga.com/tour/event/{{.PdgaId}}"
                        target="_blank"
                        class="tournament-link">
-                        View on PDGA.com →
+                        {{T "tournament.view_on_pdga" .Lang}} →
                     </a>
                     {{end}}
                 </div>

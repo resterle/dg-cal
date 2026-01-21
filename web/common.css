@@ -278,6 +278,37 @@ h2 {
     border-color: #356a52;
 }
 
+/* Language Switcher */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 16px;
+    padding-left: 16px;
+    border-left: 1px solid #e2e8f0;
+}
+
+.lang-option {
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+}
+
+.lang-option:hover {
+    color: #334155;
+    background-color: #f1f5f9;
+}
+
+.lang-option.active {
+    color: #3d7a5f;
+    background-color: #ecfdf5;
+    font-weight: 600;
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
@@ -453,6 +484,24 @@ body.admin-theme .mobile-menu-toggle {
 
 body.admin-theme .mobile-menu-toggle:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.admin-theme .lang-switcher {
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+body.admin-theme .lang-option {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+body.admin-theme .lang-option:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+body.admin-theme .lang-option.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 body.admin-theme .button-small {
@@ -1607,6 +1656,15 @@ select:focus {
 
     .mobile-menu-toggle {
         display: block;
+    }
+
+    .lang-switcher {
+        position: absolute;
+        top: 16px;
+        right: 56px;
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
     }
 
     .id-input-container {

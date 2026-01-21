@@ -126,8 +126,14 @@ func (s *TournamentService) Sync() error {
 				s.repo.UpsertRegistration(fetchedTournament.Id, &r)
 				fetchedTournament.Registrations = append(fetchedTournament.Registrations, &r)
 			}
+
+			if err := s.repo.CreateTurnamentHistory(fetchedTournament); err != nil {
+				log.Printf("Could not write tournament history: %s", err.Error())
+				return err
+			}
 		}
 	}
+
 
 	t := time.Now()
 	s.lastSync = &t

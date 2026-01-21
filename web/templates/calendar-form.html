@@ -9,18 +9,22 @@
     <body class="page-form-large">
         <nav class="top-nav">
             <div class="nav-container">
-                <a href="/" class="nav-brand">
+                <a href="/?lang={{.Lang}}" class="nav-brand">
                     <span class="logo">🥏➡️🗓️</span>
-                    <span class="brand-text">DG Cal</span>
+                    <span class="brand-text">{{T "app.name" .Lang}}</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/">Tournaments</a>
-                    <a href="/registrations">Registrations</a>
-                    {{if .ShowAdminLink}}<a href="/admin" class="active">Admin</a>{{end}}
+                    <a href="/tournaments?lang={{.Lang}}">{{T "nav.tournaments" .Lang}}</a>
+                    <a href="/registrations?lang={{.Lang}}">{{T "nav.registrations" .Lang}}</a>
+                    {{if .ShowAdminLink}}<a href="/admin?lang={{.Lang}}" class="active">{{T "nav.admin" .Lang}}</a>{{end}}
                 </div>
                 <div class="nav-actions">
-                    <a href="/calendar/edit">Access Calendar</a>
-                    <a href="/calendar/new" class="primary">Create Calendar</a>
+                    <a href="/calendar/edit?lang={{.Lang}}">{{T "nav.access_calendar" .Lang}}</a>
+                    <a href="/calendar/new?lang={{.Lang}}" class="primary">{{T "nav.create_calendar" .Lang}}</a>
+                </div>
+                <div class="lang-switcher">
+                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
+                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
                 </div>
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
@@ -30,14 +34,14 @@
             {{if .BackLink}}
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1>{{.PageTitle}}</h1>
-                <a href="{{.BackLink}}" class="button-small">← Back to Admin</a>
+                <a href="{{.BackLink}}?lang={{.Lang}}" class="button-small">← {{T "admin.back_to_admin" .Lang}}</a>
             </div>
             {{else}}
             <h1>{{.PageTitle}}</h1>
             {{end}}
 
             <div class="calendar-url-box">
-                <div class="calendar-url-title">📅 Calendar Subscription Link</div>
+                <div class="calendar-url-title">📅 {{T "admin.calendar_subscription" .Lang}}</div>
                 <div class="calendar-url-container">
                     <input
                         type="text"
@@ -52,7 +56,7 @@
                         onclick="copyCalendarUrl()"
                         class="copy-link-button"
                     >
-                        Copy Link
+                        {{T "common.copy_link" .Lang}}
                     </button>
                 </div>
                 <div class="calendar-url-info">
@@ -66,8 +70,8 @@
                 id="editForm"
             >
                 <div class="section">
-                    <h2>Calendar Details</h2>
-                    <label for="title">Calendar Title:</label>
+                    <h2>{{T "admin.calendar_details" .Lang}}</h2>
+                    <label for="title">{{T "calendar.title_label" .Lang}}</label>
                     <input
                         type="text"
                         id="title"
@@ -78,10 +82,9 @@
                 </div>
 
                 <div class="section">
-                    <h2>Series Selection</h2>
+                    <h2>{{T "admin.series_selection" .Lang}}</h2>
                     <p>
-                        Add series to automatically include all tournaments from
-                        these series.
+                        {{T "admin.series_selection_desc" .Lang}}
                     </p>
                     <div id="seriesTags">
                         {{range .Calendar.Config.Series}}
@@ -98,35 +101,35 @@
                     </div>
                     <div class="series-input-group">
                         <select id="seriesDropdown">
-                            <option value="">-- Select a series --</option>
+                            <option value="">{{T "admin.select_series" .Lang}}</option>
                         </select>
                         <button
                             type="button"
                             class="add-series-btn"
                             onclick="addSeries()"
                         >
-                            Add Series
+                            {{T "admin.add_series" .Lang}}
                         </button>
                     </div>
                 </div>
 
                 <div class="section">
-                    <h2>Individual Tournaments</h2>
+                    <h2>{{T "admin.individual_tournaments" .Lang}}</h2>
                     <p>
-                        Select specific tournaments to include in your calendar.
+                        {{T "admin.individual_tournaments_desc" .Lang}}
                     </p>
                     <div class="filter-box">
                         <input
                             type="text"
                             id="tournamentFilter"
-                            placeholder="Search tournaments..."
+                            placeholder="{{T "admin.search_tournaments" .Lang}}"
                             onkeyup="filterTournaments()"
                         />
                         <select
                             id="seriesFilter"
                             onchange="filterTournaments()"
                         >
-                            <option value="">All Series</option>
+                            <option value="">{{T "admin.all_series" .Lang}}</option>
                         </select>
                     </div>
                     <div class="checkbox-group" id="tournamentList">
@@ -149,7 +152,7 @@
                                             <a href="https://turniere.discgolf.de/index.php?p=events&sp=view&id={{.Id}}"
                                                target="_blank"
                                                class="tournament-link"
-                                               title="View on turniere.discgolf.de">
+                                               title="{{T "tournament.view_on_turniere" $.Lang}}">
                                                 🔗
                                             </a>
                                         </div>
@@ -200,7 +203,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button type="submit">Save Changes</button>
+                    <button type="submit">{{T "calendar.save_changes" .Lang}}</button>
                 </div>
             </form>
         </div>
@@ -264,6 +267,19 @@
                 });
             });
 
+            // Safe helper to create series tags without innerHTML
+            function createSeriesTag(series, onRemove) {
+                const tag = document.createElement("span");
+                tag.className = "series-tag";
+                tag.appendChild(document.createTextNode(series + " "));
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = "×";
+                btn.addEventListener("click", onRemove);
+                tag.appendChild(btn);
+                return tag;
+            }
+
             function addSeries() {
                 const dropdown = document.getElementById("seriesDropdown");
                 const series = dropdown.value.trim();
@@ -271,9 +287,7 @@
                 if (series && !seriesSet.has(series)) {
                     seriesSet.add(series);
                     const tagsDiv = document.getElementById("seriesTags");
-                    const tag = document.createElement("span");
-                    tag.className = "series-tag";
-                    tag.innerHTML = `${series} <button type="button" onclick="removeSeries(this, '${series}')">×</button>`;
+                    const tag = createSeriesTag(series, function() { removeSeries(this.parentElement, series); });
                     tagsDiv.appendChild(tag);
 
                     // Add hidden input for form submission
@@ -290,9 +304,9 @@
                 }
             }
 
-            function removeSeries(button, series) {
+            function removeSeries(tagElement, series) {
                 seriesSet.delete(series);
-                button.parentElement.remove();
+                tagElement.remove();
                 const hiddenInput = document.getElementById(`series-${series}`);
                 if (hiddenInput) {
                     hiddenInput.remove();
@@ -329,7 +343,7 @@
 
                 const button = event.target;
                 const originalText = button.textContent;
-                button.textContent = "Copied!";
+                button.textContent = "{{T "common.copied" .Lang}}";
                 button.style.backgroundColor = "#45a049";
                 setTimeout(() => {
                     button.textContent = originalText;
