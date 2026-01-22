@@ -1,35 +1,35 @@
 {{define "date-badge"}}
-<div class="date-badge" data-tooltip="{{.Format "02.01.2006"}}">
-    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .}}</div>
-    <div class="date-day">{{formatDay .}}</div>
-    <div class="date-month">{{formatMonth .}}</div>
+<div class="date-badge">
+    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .Date .Lang}}</div>
+    <div class="date-day">{{formatDay .Date}}</div>
+    <div class="date-month">{{formatMonth .Date .Lang}}</div>
 </div>
 {{end}}
 
 {{define "date-range"}}
 <div class="tournament-dates">
-    {{template "date-badge" .Start}}
+    {{template "date-badge" (dict "Date" .Start "Lang" .Lang) }}
     {{if not (sameDay .Start .End)}}
     <span class="date-separator">→</span>
-    {{template "date-badge" .End}}
+    {{template "date-badge" (dict "Date" .End "Lang" .Lang) }}
     {{end}}
 </div>
 {{end}}
 
 {{define "date-badge-with-time"}}
-<div class="date-badge" data-tooltip="{{.Format "02.01.2006 15:04"}}">
-    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .}}</div>
-    <div class="date-day">{{formatDay .}}</div>
-    <div class="date-month">{{formatMonth .}}</div>
+<div class="date-badge">
+    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .Date .Lang}}</div>
+    <div class="date-day">{{formatDay .Date }}</div>
+    <div class="date-month">{{formatMonth .Date .Lang}}</div>
 </div>
 {{end}}
 
 {{define "date-range-with-time"}}
 <div class="tournament-dates">
-    {{template "date-badge-with-time" .Start}}
+    {{template "date-badge-with-time" (dict "Date" .Start "Lang" .Lang) }}
     {{if not (sameDay .Start .End)}}
     <span class="date-separator">→</span>
-    {{template "date-badge-with-time" .End}}
+    {{template "date-badge-with-time" (dict "Date" .End "Lang" .Lang) }}
     {{end}}
 </div>
 {{end}}

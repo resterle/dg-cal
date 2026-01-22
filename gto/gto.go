@@ -224,8 +224,6 @@ func parseDateRange(dateText, layout string) (*time.Time, *time.Time, error) {
 		endDate = &d
 	}
 
-	fmt.Printf("%s %s %v %v", dateText, layout, startDate, endDate)
-
 	return &startDate, endDate, nil
 }
 

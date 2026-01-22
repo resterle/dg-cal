@@ -90,7 +90,7 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 			}
 			return ""
 		},
-		"formatMonth": func(t any) string {
+		"formatMonth": func(t any, lang string) string {
 			if date, ok := t.(time.Time); ok {
 				monthKeys := map[time.Month]string{
 					time.January: "month.jan", time.February: "month.feb", time.March: "month.mar",
@@ -99,7 +99,7 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 					time.October: "month.oct", time.November: "month.nov", time.December: "month.dec",
 				}
 				if key, ok := monthKeys[date.Month()]; ok {
-					return translator.T("de", key)
+					return translator.T(lang, key)
 				}
 				return date.Format("Jan")
 			}
@@ -111,7 +111,7 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 			}
 			return ""
 		},
-		"formatWeekday": func(t any) string {
+		"formatWeekday": func(t any, lang string) string {
 			if date, ok := t.(time.Time); ok {
 				weekdayKeys := map[time.Weekday]string{
 					time.Monday: "weekday.mon", time.Tuesday: "weekday.tue", time.Wednesday: "weekday.wed",
@@ -119,7 +119,7 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 					time.Sunday: "weekday.sun",
 				}
 				if key, ok := weekdayKeys[date.Weekday()]; ok {
-					return translator.T("de", key)
+					return translator.T(lang, key)
 				}
 				return date.Format("Mon")
 			}

@@ -112,14 +112,14 @@
                     {{$tournamentId := .Id}}
                     <tr data-title="{{.Title}}" data-series="{{join .Series ","}}" data-pdga="{{.PdgaTier}}" data-drating="{{if .DRating}}yes{{else}}no{{end}}" data-month="{{.StartDate.Format "2006-01"}}" data-date="{{.StartDate.Format "2006-01-02"}}" data-year="{{.StartDate.Format "2006"}}">
                         <td data-sort-value="{{.StartDate.Format "2006-01-02"}}">
-                            {{template "date-range" (dict "Start" .StartDate "End" .EndDate)}}
+                            {{template "date-range" (dict "Start" .StartDate "End" .EndDate "Lang" $.Lang)}}
                             {{$tournament := .}}
                             <div class="reg-status-list">
                                 {{if .HasActiveRegistration}}
                                 <a href="https://turniere.discgolf.de/index.php?p=events&sp=register&id={{.Id}}" target="_blank" class="reg-item open">{{if and .HasMultiplePhases .ActiveRegistrationTitle}}{{.ActiveRegistrationTitle}} · {{end}}{{T "tournaments.registration_open" $.Lang}} ↗</a>
                                 {{end}}
                                 {{range .UpcomingRegistrations}}
-                                <span class="reg-item {{if .OpensToday}}today{{else if .OpensTomorrow}}tomorrow{{end}}">{{if $tournament.HasMultiplePhases}}{{if .Title}}{{.Title}} · {{end}}{{end}}Reg. {{if .OpensToday}}opens today {{.StartTime.Format "15:04"}}{{else if .OpensTomorrow}}opens tomorrow {{.StartTime.Format "15:04"}}{{else}}opens in {{.OpensInDays}}d{{end}}</span>
+                                <span class="reg-item {{if .OpensToday}}today{{else if .OpensTomorrow}}tomorrow{{end}}">{{if $tournament.HasMultiplePhases}}{{if .Title}}{{.Title}} · {{end}}{{end}}{{if .OpensToday}}{{TArgs "tournaments.reg_opens_today" $.Lang (.StartTime.Format "15:04")}}{{else if .OpensTomorrow}}{{TArgs "tournaments.reg_opens_tomorrow" $.Lang (.StartTime.Format "15:04")}}{{else}}{{TArgs "tournaments.reg_opens_in_days" $.Lang .OpensInDays}}{{end}}</span>
                                 {{end}}
                                 {{if and (not .HasActiveRegistration) (not .UpcomingRegistrations)}}
                                 <span class="reg-item status">{{.Status}}</span>
@@ -151,7 +151,7 @@
                                     {{end}}
                                 {{end}}
                                 {{if .DRating}}
-                                <span class="info-badge drating-badge">D-Rating</span>
+                                <span class="info-badge drating-badge">{{T "tournament.drating" $.Lang}}</span>
                                 {{end}}
                             </div>
                         </td>
@@ -261,6 +261,150 @@
                     // Hide divider if no tournaments are visible in this year group
                     divider.style.display = hasVisibleTournaments ? '' : 'none';
                 });
+            }
+
+            // URL query parameter handling
+            function updateUrlParams() {
+                const params = new URLSearchParams();
+
+                // Preserve lang parameter
+                const currentParams = new URLSearchParams(window.location.search);
+                if (currentParams.has('lang')) {
+                    params.set('lang', currentParams.get('lang'));
+                }
+
+                // Search
+                const searchValue = document.getElementById('filter-search').value.trim();
+                if (searchValue) params.set('search', searchValue);
+
+                // Series (multi-select)
+                if (selectedSeries.size > 0) {
+                    params.set('series', Array.from(selectedSeries).join(','));
+                }
+
+                // PDGA tier (multi-select)
+                if (selectedPdga.size > 0) {
+                    params.set('pdga', Array.from(selectedPdga).join(','));
+                }
+
+                // Month (multi-select)
+                if (selectedMonths.size > 0) {
+                    params.set('month', Array.from(selectedMonths).join(','));
+                }
+
+                // Year
+                const yearValue = document.getElementById('filter-year').value;
+                if (yearValue !== 'all') params.set('year', yearValue);
+
+                // D-Rating
+                const dratingValue = document.getElementById('filter-drating').value;
+                if (dratingValue !== 'all') params.set('drating', dratingValue);
+
+                // Sort
+                const sortValue = document.getElementById('filter-sort').value;
+                if (sortValue !== 'asc') params.set('sort', sortValue);
+
+                // Update URL without reload
+                const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
+
+            function loadFiltersFromUrl() {
+                const params = new URLSearchParams(window.location.search);
+
+                // Search
+                const searchValue = params.get('search');
+                if (searchValue) {
+                    document.getElementById('filter-search').value = searchValue;
+                    tableFilter.setFilterValue('search', searchValue);
+                }
+
+                // Series
+                const seriesParam = params.get('series');
+                if (seriesParam) {
+                    seriesParam.split(',').forEach(value => {
+                        if (seriesSet.has(value) && !selectedSeries.has(value)) {
+                            selectedSeries.add(value);
+                            // Remove from dropdown
+                            const dropdown = document.getElementById('filter-series-dropdown');
+                            for (let i = 1; i < dropdown.options.length; i++) {
+                                if (dropdown.options[i].value === value) {
+                                    dropdown.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    if (selectedSeries.size > 0) {
+                        updateTagDisplay('series-tags', selectedSeries, removeSeriesFilter);
+                        tableFilter.setFilterValue('series', true);
+                    }
+                }
+
+                // PDGA tier
+                const pdgaParam = params.get('pdga');
+                if (pdgaParam) {
+                    pdgaParam.split(',').forEach(value => {
+                        if (pdgaSet.has(value) && !selectedPdga.has(value)) {
+                            selectedPdga.add(value);
+                            // Remove from dropdown
+                            const dropdown = document.getElementById('filter-pdga-dropdown');
+                            for (let i = 1; i < dropdown.options.length; i++) {
+                                if (dropdown.options[i].value === value) {
+                                    dropdown.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    if (selectedPdga.size > 0) {
+                        updateTagDisplay('pdga-tags', selectedPdga, removePdgaFilter);
+                        tableFilter.setFilterValue('pdga', true);
+                    }
+                }
+
+                // Month
+                const monthParam = params.get('month');
+                if (monthParam) {
+                    monthParam.split(',').forEach(value => {
+                        if (monthsData.has(value) && !selectedMonths.has(value)) {
+                            selectedMonths.add(value);
+                            // Remove from dropdown
+                            const dropdown = document.getElementById('filter-month-dropdown');
+                            for (let i = 1; i < dropdown.options.length; i++) {
+                                if (dropdown.options[i].value === value) {
+                                    dropdown.remove(i);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    if (selectedMonths.size > 0) {
+                        updateTagDisplay('month-tags', selectedMonths, removeMonthFilter);
+                        tableFilter.setFilterValue('month', true);
+                    }
+                }
+
+                // Year
+                const yearParam = params.get('year');
+                if (yearParam) {
+                    document.getElementById('filter-year').value = yearParam;
+                    tableFilter.setFilterValue('year', yearParam);
+                }
+
+                // D-Rating
+                const dratingParam = params.get('drating');
+                if (dratingParam) {
+                    document.getElementById('filter-drating').value = dratingParam;
+                    tableFilter.setFilterValue('drating', dratingParam);
+                }
+
+                // Sort
+                const sortParam = params.get('sort');
+                if (sortParam) {
+                    document.getElementById('filter-sort').value = sortParam;
+                    tableFilter.sort(0, sortParam);
+                }
             }
 
             document.addEventListener('DOMContentLoaded', function() {
@@ -385,21 +529,28 @@
                     yearSelect.appendChild(option);
                 });
 
+                // Load filters from URL params
+                loadFiltersFromUrl();
+
                 // Event listeners
                 document.getElementById('filter-search').addEventListener('input', (e) => {
                     tableFilter.setFilterValue('search', e.target.value.trim());
+                    updateUrlParams();
                 });
 
                 document.getElementById('filter-year').addEventListener('change', (e) => {
                     tableFilter.setFilterValue('year', e.target.value);
+                    updateUrlParams();
                 });
 
                 document.getElementById('filter-drating').addEventListener('change', (e) => {
                     tableFilter.setFilterValue('drating', e.target.value);
+                    updateUrlParams();
                 });
 
                 document.getElementById('filter-sort').addEventListener('change', (e) => {
                     tableFilter.sort(0, e.target.value);
+                    updateUrlParams();
                 });
 
                 // Reset button
@@ -463,6 +614,7 @@
                     document.getElementById('filter-sort').value = 'asc';
 
                     tableFilter.reset();
+                    updateUrlParams();
                 });
             });
 
@@ -494,6 +646,7 @@
                     selectedOption.remove();
                     dropdown.selectedIndex = 0;
                     tableFilter.setFilterValue('series', true);
+                    updateUrlParams();
                 }
             }
 
@@ -519,6 +672,7 @@
                 options.forEach(opt => dropdown.add(opt));
 
                 tableFilter.setFilterValue('series', true);
+                updateUrlParams();
             }
 
             function addPdgaFilter() {
@@ -536,6 +690,7 @@
                     selectedOption.remove();
                     dropdown.selectedIndex = 0;
                     tableFilter.setFilterValue('pdga', true);
+                    updateUrlParams();
                 }
             }
 
@@ -561,6 +716,7 @@
                 options.forEach(opt => dropdown.add(opt));
 
                 tableFilter.setFilterValue('pdga', true);
+                updateUrlParams();
             }
 
             function addMonthFilter() {
@@ -579,6 +735,7 @@
                     selectedOption.remove();
                     dropdown.selectedIndex = 0;
                     tableFilter.setFilterValue('month', true);
+                    updateUrlParams();
                 }
             }
 
@@ -605,6 +762,7 @@
                 allOptions.forEach(opt => dropdown.add(opt));
 
                 tableFilter.setFilterValue('month', true);
+                updateUrlParams();
             }
 
             function updateTagDisplay(tagsDivId, selectedSet, removeFn) {
@@ -619,5 +777,13 @@
                 });
             }
         </script>
+        <footer class="site-footer">
+            <a href="https://github.com/resterle/dg-cal" target="_blank">
+                <svg class="github-icon" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                {{T "footer.view_on_github" .Lang}}
+            </a>
+        </footer>
     </body>
 </html>

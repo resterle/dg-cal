@@ -40,7 +40,8 @@ func (s *TournamentService) init() error {
 	if err != nil {
 		return err
 	}
-	for _, tt := range t {
+	for i := range t {
+		tt := t[i]
 		s.tournaments[tt.Id] = &tt
 	}
 	log.Printf("Loaded %d tournaments from db", len(t))

@@ -151,6 +151,7 @@
   "admin.geo_location": "Geo Location",
   "admin.no_history": "No history found.",
   "admin.back_to_tournaments": "Back to Tournaments",
+  "admin.details": "Details",
 
   "error.404_title": "Page Not Found",
   "error.404_message": "The page you're looking for doesn't exist or has been moved.",
@@ -189,5 +190,7 @@
   "month.sep": "Sep",
   "month.oct": "Oct",
   "month.nov": "Nov",
-  "month.dec": "Dec"
+  "month.dec": "Dec",
+
+  "footer.view_on_github": "View on GitHub"
 }

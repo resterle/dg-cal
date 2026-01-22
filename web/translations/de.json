@@ -151,6 +151,7 @@
   "admin.geo_location": "Geo-Standort",
   "admin.no_history": "Kein Verlauf gefunden.",
   "admin.back_to_tournaments": "Zurück zu Turnieren",
+  "admin.details": "Details",
 
   "error.404_title": "Seite nicht gefunden",
   "error.404_message": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
@@ -189,5 +190,7 @@
   "month.sep": "Sep",
   "month.oct": "Okt",
   "month.nov": "Nov",
-  "month.dec": "Dez"
+  "month.dec": "Dez",
+
+  "footer.view_on_github": "Auf GitHub ansehen"
 }
