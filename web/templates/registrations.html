@@ -1,8 +1,12 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{{T "registrations.title" .Lang}}</title>
         <link rel="stylesheet" href="/common.css">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <script src="/common.js"></script>
         <script src="/table-filters.js"></script>
     </head>
     <body class="page-table">
@@ -35,6 +39,10 @@
                 <span id="sync-time" data-iso="{{ .LastSyncISO }}" style="display:none;"></span>
             </p>
             <div class="filters-container">
+                <button class="filters-toggle" onclick="toggleFilters()" data-show-text="{{T "filter.show_filters" .Lang}}" data-hide-text="{{T "filter.hide_filters" .Lang}}">
+                    <span>{{T "filter.show_filters" .Lang}}</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
                 <div class="filters-row">
                     <div class="filter-item-wide">
                         <label class="filter-label">{{T "filter.search" .Lang}}</label>
@@ -135,11 +143,6 @@
         </div>
         </div>
         <script>
-            function toggleMobileMenu() {
-                document.querySelector('.nav-links').classList.toggle('mobile-open');
-                document.querySelector('.nav-actions').classList.toggle('mobile-open');
-            }
-
             // Translations for sync time
             const i18n = {
                 justNow: '{{T "time.just_now" .Lang}}',
@@ -200,11 +203,17 @@
 
                 // Check if there are visible open rows
                 const openRows = document.querySelectorAll('tr[data-status="open"]');
-                const hasVisibleOpen = Array.from(openRows).some(row => row.style.display !== 'none');
+                const hasVisibleOpen = Array.from(openRows).some(row => {
+                    const style = window.getComputedStyle(row);
+                    return style.display !== 'none';
+                });
 
                 // Check if there are visible upcoming rows
                 const upcomingRows = document.querySelectorAll('tr[data-status="upcoming"]');
-                const hasVisibleUpcoming = Array.from(upcomingRows).some(row => row.style.display !== 'none');
+                const hasVisibleUpcoming = Array.from(upcomingRows).some(row => {
+                    const style = window.getComputedStyle(row);
+                    return style.display !== 'none';
+                });
 
                 // Show divider only if both sections have visible rows
                 divider.style.display = (hasVisibleOpen && hasVisibleUpcoming) ? '' : 'none';
@@ -446,13 +455,6 @@
                 });
             }
         </script>
-        <footer class="site-footer">
-            <a href="https://github.com/resterle/dg-cal" target="_blank">
-                <svg class="github-icon" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                </svg>
-                {{T "footer.view_on_github" .Lang}}
-            </a>
-        </footer>
+        {{template "footer" .}}
     </body>
 </html>

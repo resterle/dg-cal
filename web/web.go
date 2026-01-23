@@ -26,8 +26,14 @@ var templatesFS embed.FS
 //go:embed common.css
 var commonCSS []byte
 
+//go:embed common.js
+var commonJS []byte
+
 //go:embed table-filters.js
 var tableFiltersJS []byte
+
+//go:embed favicon.svg
+var faviconSVG []byte
 
 //go:embed fonts/*.woff2
 var fontsFS embed.FS
@@ -682,6 +688,18 @@ func (app *WebApp) CommonCSSHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/css; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	w.Write(commonCSS)
+}
+
+func (app *WebApp) CommonJSHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	w.Write(commonJS)
+}
+
+func (app *WebApp) FaviconHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Write(faviconSVG)
 }
 
 func (app *WebApp) TableFiltersJSHandler(w http.ResponseWriter, r *http.Request) {

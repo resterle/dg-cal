@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Calendar body -->
+  <rect x="4" y="6" width="24" height="22" rx="2" fill="#fff" stroke="#2c3e50" stroke-width="1.5"/>
+  <!-- Calendar header -->
+  <rect x="4" y="6" width="24" height="7" rx="2" fill="#c14a4a"/>
+  <rect x="4" y="11" width="24" height="2" fill="#c14a4a"/>
+  <!-- Calendar rings -->
+  <rect x="9" y="3" width="2" height="5" rx="1" fill="#2c3e50"/>
+  <rect x="21" y="3" width="2" height="5" rx="1" fill="#2c3e50"/>
+  <!-- Calendar grid dots -->
+  <circle cx="10" cy="18" r="1.2" fill="#ccc"/>
+  <circle cx="16" cy="18" r="1.2" fill="#ccc"/>
+  <circle cx="22" cy="18" r="1.2" fill="#ccc"/>
+  <circle cx="10" cy="23" r="1.2" fill="#ccc"/>
+  <circle cx="16" cy="23" r="1.2" fill="#ccc"/>
+  <circle cx="22" cy="23" r="1.2" fill="#ccc"/>
+  <!-- Disc golf disc in front -->
+  <ellipse cx="22" cy="22" rx="8" ry="8" fill="#4a6fa5"/>
+  <ellipse cx="22" cy="22" rx="5" ry="5" fill="#3a5a8a"/>
+  <ellipse cx="22" cy="22" rx="2" ry="2" fill="#4a6fa5"/>
+</svg>
