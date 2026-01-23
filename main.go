@@ -90,8 +90,6 @@ func main() {
 	http.HandleFunc("POST /calendar/edit/{id}", webApp.EditCalendarHandler)
 	http.HandleFunc("GET /api/tournaments", webApp.TournamentHandler)
 	http.HandleFunc("GET /ical/{id}", webApp.IcsHandler)
-	http.HandleFunc("GET /common.css", webApp.CommonCSSHandler)
-	http.HandleFunc("GET /table-filters.js", webApp.TableFiltersJSHandler)
 	http.HandleFunc("GET /fonts/{name}", webApp.FontHandler)
 
 	http.HandleFunc("GET /admin", webApp.AdminHandler)
@@ -100,6 +98,11 @@ func main() {
 	http.HandleFunc("POST /admin/calendar/{id}", webApp.AdminUpdateCalendarHandler)
 	http.HandleFunc("GET /admin/tournaments", webApp.AdminTournamentsHandler)
 	http.HandleFunc("GET /admin/tournament/{id}/history", webApp.AdminTournamentHistoryHandler)
+
+	http.HandleFunc("GET /common.css", webApp.CommonCSSHandler)
+	http.HandleFunc("GET /favicon.svg", webApp.FaviconHandler)
+	http.HandleFunc("GET /common.js", webApp.CommonJSHandler)
+	http.HandleFunc("GET /table-filters.js", webApp.TableFiltersJSHandler)
 
 	http.HandleFunc("/", webApp.NotFoundHandler)
 

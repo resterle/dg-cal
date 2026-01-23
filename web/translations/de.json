@@ -52,6 +52,8 @@
   "filter.earliest_first": "Früheste zuerst",
   "filter.latest_first": "Späteste zuerst",
   "filter.reset_all": "Zurücksetzen",
+  "filter.show_filters": "Filter anzeigen",
+  "filter.hide_filters": "Filter ausblenden",
 
   "calendar.create_title": "Neuen Kalender erstellen",
   "calendar.create_desc": "Erstelle einen personalisierten Turnierkalender. Du erhältst einen einzigartigen Zugangscode zur Verwaltung.",
