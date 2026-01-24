@@ -8,7 +8,7 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <script src="/common.js"></script>
     </head>
-    <body class="page-table admin-theme">
+    <body class="page-form-large admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
                 <a href="/?lang={{.Lang}}" class="nav-brand">
@@ -22,16 +22,45 @@
                 <div class="nav-actions">
                     <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
                 </div>
-                <div class="lang-switcher">
-                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
-                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
-                </div>
+                {{template "lang-switcher" .}}
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
             <h1>{{T "admin.title" .Lang}}</h1>
-            <div class="table-container">
+
+            <!-- Mobile card view -->
+            <div class="admin-calendar-cards">
+                {{range .Calendars}}
+                <div class="admin-calendar-card">
+                    <div class="admin-card-header">
+                        <span class="admin-card-id">#{{.Id}}</span>
+                        <span class="admin-card-stats">{{if .Config}}{{len .Config.Tournaments}}{{else}}0{{end}} {{T "admin.tournaments" $.Lang}}</span>
+                    </div>
+                    <div class="admin-card-title">{{.Title}}</div>
+                    <div class="admin-card-meta">
+                        <span>{{T "admin.created" $.Lang}}: {{.CreatedAt.Format "2006-01-02"}}</span>
+                        <span>{{T "admin.series_column" $.Lang}}: {{if .Config}}{{len .Config.Series}}{{else}}0{{end}}</span>
+                    </div>
+                    <div class="admin-card-updated">
+                        {{T "admin.last_fetched" $.Lang}}: {{if .RetrievedAt}}{{.RetrievedAt.Format "2006-01-02 15:04"}}{{else}}<em>{{T "admin.never" $.Lang}}</em>{{end}}
+                    </div>
+                    <div class="admin-card-actions">
+                        <a href="/admin/calendar/{{.Id}}?lang={{$.Lang}}" class="button-small">{{T "admin.view_edit" $.Lang}}</a>
+                        <form method="POST" action="/admin/calendar/delete/{{.Id}}" onsubmit="return confirm('{{T "admin.delete_confirm" $.Lang}}');">
+                            <button type="submit" class="button-small button-danger">{{T "admin.delete" $.Lang}}</button>
+                        </form>
+                    </div>
+                </div>
+                {{else}}
+                <div class="empty-state">
+                    {{T "admin.no_calendars" .Lang}}
+                </div>
+                {{end}}
+            </div>
+
+            <!-- Desktop table view -->
+            <div class="table-container admin-table-desktop">
                 <table>
                     <thead>
                         <tr>

@@ -12,3 +12,12 @@
 {{define "favicon-link"}}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {{end}}
+
+{{define "lang-switcher"}}
+<div class="lang-switcher">
+    <select class="lang-select" onchange="changeLanguage(this.value)">
+        <option value="de" {{if eq .Lang "de"}}selected{{end}}>Deutsch</option>
+        <option value="en" {{if eq .Lang "en"}}selected{{end}}>English</option>
+    </select>
+</div>
+{{end}}

@@ -1,5 +1,12 @@
 // Common JavaScript functions shared across pages
 
+// Language switcher
+function changeLanguage(lang) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang', lang);
+    window.location.href = url.toString();
+}
+
 // Mobile menu toggle
 function toggleMobileMenu() {
     document.querySelector('.nav-links').classList.toggle('mobile-open');

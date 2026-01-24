@@ -22,10 +22,7 @@
                 <div class="nav-actions">
                     <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
                 </div>
-                <div class="lang-switcher">
-                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
-                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
-                </div>
+                {{template "lang-switcher" .}}
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>

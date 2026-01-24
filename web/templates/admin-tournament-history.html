@@ -8,7 +8,7 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <script src="/common.js"></script>
     </head>
-    <body class="page-table admin-theme">
+    <body class="page-form-large admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
                 <a href="/?lang={{.Lang}}" class="nav-brand">
@@ -22,55 +22,112 @@
                 <div class="nav-actions">
                     <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
                 </div>
-                <div class="lang-switcher">
-                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
-                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
-                </div>
+                {{template "lang-switcher" .}}
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1>{{T "admin.tournament_history" .Lang}}: {{.Tournament.Title}}</h1>
-                <a href="/admin/tournaments?lang={{.Lang}}" class="button-small">← {{T "admin.back_to_tournaments" .Lang}}</a>
+            <div class="admin-detail-header">
+                <a href="/admin/tournaments?lang={{.Lang}}" class="back-link-mobile">← {{T "admin.back_to_tournaments" .Lang}}</a>
+                <h1>{{.Tournament.Title}}</h1>
             </div>
 
-            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
-                <h2 style="margin-top: 0;">{{T "admin.current_state" .Lang}}</h2>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600; width: 20%;">{{T "admin.id" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.Id}}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "admin.title_column" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.Title}}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "tournament.status" .Lang}}</td>
-                        <td style="padding: 8px;"><span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span></td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "tournament.location" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.Localtion}}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "admin.start_date" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.StartDate.Format "2006-01-02"}}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "admin.end_date" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.EndDate.Format "2006-01-02"}}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e0e0e0;">
-                        <td style="padding: 8px; font-weight: 600;">{{T "admin.last_updated" .Lang}}</td>
-                        <td style="padding: 8px;">{{.Tournament.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
-                    </tr>
-                </table>
+            <!-- Current State Card -->
+            <div class="admin-detail-card">
+                <h2>{{T "admin.current_state" .Lang}}</h2>
+                <div class="admin-detail-grid">
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "admin.id" .Lang}}</span>
+                        <span class="admin-detail-value">{{.Tournament.Id}}</span>
+                    </div>
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "tournament.status" .Lang}}</span>
+                        <span class="admin-detail-value"><span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span></span>
+                    </div>
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "tournament.location" .Lang}}</span>
+                        <span class="admin-detail-value">{{.Tournament.Localtion}}</span>
+                    </div>
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "admin.start_date" .Lang}}</span>
+                        <span class="admin-detail-value">{{.Tournament.StartDate.Format "2006-01-02"}}</span>
+                    </div>
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "admin.end_date" .Lang}}</span>
+                        <span class="admin-detail-value">{{.Tournament.EndDate.Format "2006-01-02"}}</span>
+                    </div>
+                    <div class="admin-detail-item">
+                        <span class="admin-detail-label">{{T "admin.last_updated" .Lang}}</span>
+                        <span class="admin-detail-value">{{.Tournament.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                    </div>
+                </div>
+                <div class="admin-detail-actions">
+                    <a href="/tournament/{{.Tournament.Id}}?lang={{.Lang}}" class="button-small">{{T "admin.view" .Lang}} →</a>
+                </div>
             </div>
 
-            <h2>{{TArgs "admin.change_history" .Lang (len .History)}}</h2>
-            <div class="table-container">
+            <!-- History Section -->
+            <h2 class="history-title">{{TArgs "admin.change_history" .Lang (len .History)}}</h2>
+
+            <!-- Mobile history cards -->
+            <div class="admin-history-cards">
+                {{range .History}}
+                <details class="admin-history-card">
+                    <summary class="admin-history-summary">
+                        <div class="admin-history-date">{{.UpdatedAt.Format "2006-01-02 15:04"}}</div>
+                        <div class="admin-history-info">
+                            <span class="tournament-status status-{{.Status | lower}}">{{.Status}}</span>
+                            <span class="admin-history-title">{{.Title}}</span>
+                        </div>
+                    </summary>
+                    <div class="admin-history-details">
+                        <div class="admin-detail-grid">
+                            <div class="admin-detail-item">
+                                <span class="admin-detail-label">{{T "tournament.location" $.Lang}}</span>
+                                <span class="admin-detail-value">{{.Localtion}}</span>
+                            </div>
+                            <div class="admin-detail-item">
+                                <span class="admin-detail-label">{{T "admin.start_date" $.Lang}}</span>
+                                <span class="admin-detail-value">{{.StartDate.Format "2006-01-02"}}</span>
+                            </div>
+                            <div class="admin-detail-item">
+                                <span class="admin-detail-label">{{T "admin.end_date" $.Lang}}</span>
+                                <span class="admin-detail-value">{{.EndDate.Format "2006-01-02"}}</span>
+                            </div>
+                            {{if .Series}}
+                            <div class="admin-detail-item">
+                                <span class="admin-detail-label">{{T "tournament.series" $.Lang}}</span>
+                                <span class="admin-detail-value">{{join .Series ", "}}</span>
+                            </div>
+                            {{end}}
+                            {{if .PdgaTier}}
+                            <div class="admin-detail-item">
+                                <span class="admin-detail-label">{{T "tournament.pdga_tier" $.Lang}}</span>
+                                <span class="admin-detail-value">{{.PdgaTier}}</span>
+                            </div>
+                            {{end}}
+                            {{if .Registrations}}
+                            <div class="admin-detail-item admin-detail-full">
+                                <span class="admin-detail-label">{{T "nav.registrations" $.Lang}}</span>
+                                <span class="admin-detail-value">
+                                    {{range .Registrations}}
+                                    <div>{{.Title}}: {{.StartDate.Format "2006-01-02"}} - {{.EndDate.Format "2006-01-02"}}</div>
+                                    {{end}}
+                                </span>
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                </details>
+                {{else}}
+                <div class="empty-state">
+                    {{T "admin.no_history" .Lang}}
+                </div>
+                {{end}}
+            </div>
+
+            <!-- Desktop table view -->
+            <div class="table-container admin-table-desktop">
                 <table>
                     <thead>
                         <tr>

@@ -8,7 +8,7 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         <script src="/common.js"></script>
     </head>
-    <body class="page-table admin-theme">
+    <body class="page-form-large admin-theme">
         <nav class="top-nav">
             <div class="nav-container">
                 <a href="/?lang={{.Lang}}" class="nav-brand">
@@ -22,16 +22,39 @@
                 <div class="nav-actions">
                     <a href="/?lang={{.Lang}}">{{T "nav.exit_admin" .Lang}}</a>
                 </div>
-                <div class="lang-switcher">
-                    <a href="?lang=de" class="lang-option{{if eq .Lang "de"}} active{{end}}">DE</a>
-                    <a href="?lang=en" class="lang-option{{if eq .Lang "en"}} active{{end}}">EN</a>
-                </div>
+                {{template "lang-switcher" .}}
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
             </div>
         </nav>
         <div class="main-content">
             <h1>{{T "admin.tournament_admin" .Lang}}</h1>
-            <div class="table-container">
+
+            <!-- Mobile card view -->
+            <div class="admin-tournament-cards">
+                {{range .Tournaments}}
+                <a href="/admin/tournament/{{.Tournament.Id}}/history?lang={{$.Lang}}" class="admin-tournament-card">
+                    <div class="admin-card-header">
+                        <span class="admin-card-id">#{{.Tournament.Id}}</span>
+                        <span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span>
+                    </div>
+                    <div class="admin-card-title">{{.Tournament.Title}}</div>
+                    <div class="admin-card-meta">
+                        <span>📅 {{.Tournament.StartDate.Format "2006-01-02"}}</span>
+                        <span>🔄 {{.Count}} {{T "admin.changes" $.Lang}}</span>
+                    </div>
+                    <div class="admin-card-updated">
+                        {{T "admin.updated_at" $.Lang}}: {{.Tournament.UpdatedAt.Format "2006-01-02 15:04"}}
+                    </div>
+                </a>
+                {{else}}
+                <div class="empty-state">
+                    {{T "admin.no_tournaments" .Lang}}
+                </div>
+                {{end}}
+            </div>
+
+            <!-- Desktop table view -->
+            <div class="table-container admin-table-desktop">
                 <table>
                     <thead>
                         <tr>
