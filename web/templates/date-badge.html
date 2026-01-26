@@ -1,6 +1,6 @@
 {{define "date-badge"}}
 <div class="date-badge">
-    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .Date .Lang}}</div>
+    <div class="date-weekday {{weekdayClass .Date}}">{{formatWeekday .Date .Lang}}</div>
     <div class="date-day">{{formatDay .Date}}</div>
     <div class="date-month">{{formatMonth .Date .Lang}}</div>
 </div>
@@ -18,8 +18,8 @@
 
 {{define "date-badge-with-time"}}
 <div class="date-badge">
-    <div class="date-weekday {{weekdayClass .}}">{{formatWeekday .Date .Lang}}</div>
-    <div class="date-day">{{formatDay .Date }}</div>
+    <div class="date-weekday {{weekdayClass .Date}}">{{formatWeekday .Date .Lang}}</div>
+    <div class="date-day">{{formatDay .Date}}</div>
     <div class="date-month">{{formatMonth .Date .Lang}}</div>
 </div>
 {{end}}

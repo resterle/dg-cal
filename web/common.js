@@ -22,7 +22,7 @@ function toggleFilters() {
     btn.classList.toggle('active');
     row.classList.toggle('mobile-open');
 
-    const textSpan = btn.querySelector('span:first-child');
+    const textSpan = btn.querySelector('.filter-text');
     if (textSpan) {
         const showText = btn.dataset.showText || 'Show Filters';
         const hideText = btn.dataset.hideText || 'Hide Filters';

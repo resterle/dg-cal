@@ -155,6 +155,23 @@ func NewWebApp(tournamentService TournamentServiceInterface, calendarService Cal
 		"lower": func(s string) string {
 			return strings.ToLower(strings.ReplaceAll(s, " ", "-"))
 		},
+		"TStatus": func(status string, lang string) string {
+			// Normalize to title case for lookup
+			normalized := strings.ToLower(status)
+			statusKeys := map[string]string{
+				"announced":   "status.announced",
+				"provisional": "status.provisional",
+				"registration": "status.registration",
+				"in progress": "status.in_progress",
+				"in progess":  "status.in_progress", // Handle typo in data
+				"done":        "status.done",
+				"cancelled":   "status.cancelled",
+			}
+			if key, ok := statusKeys[normalized]; ok {
+				return translator.T(lang, key)
+			}
+			return status
+		},
 		"join": strings.Join,
 		"dict": func(values ...interface{}) (map[string]interface{}, error) {
 			if len(values)%2 != 0 {
@@ -258,8 +275,9 @@ func (app *WebApp) TournamentsHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			// Check for upcoming registration (starts in the future, within 14 days)
 			if reg.StartDate.After(now) {
-				duration := reg.StartDate.Sub(now)
-				days := int(duration.Hours() / 24)
+				// Calculate calendar days until registration opens
+				regStartDate := time.Date(reg.StartDate.Year(), reg.StartDate.Month(), reg.StartDate.Day(), 0, 0, 0, 0, reg.StartDate.Location())
+				days := int(regStartDate.Sub(today).Hours() / 24)
 
 				if days <= 14 {
 					upcoming := UpcomingRegistration{
@@ -381,27 +399,27 @@ func (app *WebApp) RegistrationsHandler(w http.ResponseWriter, r *http.Request) 
 
 			// Check if registration opens today or tomorrow
 			opensToday := !isActive && phase.StartDate.After(now) && phase.StartDate.Before(tomorrow)
-			opensTomorrow := !isActive && phase.StartDate.After(tomorrow) && phase.StartDate.Before(dayAfterTomorrow)
+			opensTomorrow := !isActive && !phase.StartDate.Before(tomorrow) && phase.StartDate.Before(dayAfterTomorrow)
 
 			// Check if registration closes today or tomorrow
 			closesToday := isActive && phase.EndDate.After(now) && phase.EndDate.Before(tomorrow)
-			closesTomorrow := isActive && phase.EndDate.After(tomorrow) && phase.EndDate.Before(dayAfterTomorrow)
+			closesTomorrow := isActive && !phase.EndDate.Before(tomorrow) && phase.EndDate.Before(dayAfterTomorrow)
 
-			// Calculate days left until registration closes
+			// Calculate days left until registration closes (using calendar days)
 			daysLeft := 0
 			if isActive {
-				duration := phase.EndDate.Sub(now)
-				daysLeft = int(duration.Hours() / 24)
+				endDate := time.Date(phase.EndDate.Year(), phase.EndDate.Month(), phase.EndDate.Day(), 0, 0, 0, 0, phase.EndDate.Location())
+				daysLeft = int(endDate.Sub(today).Hours() / 24)
 				if daysLeft < 0 {
 					daysLeft = 0
 				}
 			}
 
-			// Calculate days until registration opens
+			// Calculate days until registration opens (using calendar days)
 			opensInDays := 0
 			if !isActive && phase.StartDate.After(now) {
-				duration := phase.StartDate.Sub(now)
-				opensInDays = int(duration.Hours() / 24)
+				startDate := time.Date(phase.StartDate.Year(), phase.StartDate.Month(), phase.StartDate.Day(), 0, 0, 0, 0, phase.StartDate.Location())
+				opensInDays = int(startDate.Sub(today).Hours() / 24)
 				if opensInDays < 0 {
 					opensInDays = 0
 				}

@@ -43,7 +43,7 @@
                 <div class="detail-card">
                     {{template "date-range" (dict "Start" .StartDate "End" .EndDate "Lang" .Lang)}}
                     <div class="value" style="margin-top: 12px;">
-                        <span class="tournament-status status-{{.Status | lower}}">{{.Status}}</span>
+                        <span class="tournament-status status-{{.Status | lower}}">{{TStatus .Status .Lang}}</span>
                     </div>
                 </div>
 

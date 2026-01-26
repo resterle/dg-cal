@@ -42,7 +42,7 @@
                     </div>
                     <div class="admin-detail-item">
                         <span class="admin-detail-label">{{T "tournament.status" .Lang}}</span>
-                        <span class="admin-detail-value"><span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span></span>
+                        <span class="admin-detail-value"><span class="tournament-status status-{{.Tournament.Status | lower}}">{{TStatus .Tournament.Status .Lang}}</span></span>
                     </div>
                     <div class="admin-detail-item">
                         <span class="admin-detail-label">{{T "tournament.location" .Lang}}</span>
@@ -76,7 +76,7 @@
                     <summary class="admin-history-summary">
                         <div class="admin-history-date">{{.UpdatedAt.Format "2006-01-02 15:04"}}</div>
                         <div class="admin-history-info">
-                            <span class="tournament-status status-{{.Status | lower}}">{{.Status}}</span>
+                            <span class="tournament-status status-{{.Status | lower}}">{{TStatus .Status $.Lang}}</span>
                             <span class="admin-history-title">{{.Title}}</span>
                         </div>
                     </summary>
@@ -145,7 +145,7 @@
                         <tr>
                             <td>{{.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
                             <td>{{.Title}}</td>
-                            <td><span class="tournament-status status-{{.Status | lower}}">{{.Status}}</span></td>
+                            <td><span class="tournament-status status-{{.Status | lower}}">{{TStatus .Status $.Lang}}</span></td>
                             <td>{{.StartDate.Format "2006-01-02"}}</td>
                             <td>{{.EndDate.Format "2006-01-02"}}</td>
                             <td>{{.Localtion}}</td>

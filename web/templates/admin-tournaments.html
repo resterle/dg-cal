@@ -35,7 +35,7 @@
                 <a href="/admin/tournament/{{.Tournament.Id}}/history?lang={{$.Lang}}" class="admin-tournament-card">
                     <div class="admin-card-header">
                         <span class="admin-card-id">#{{.Tournament.Id}}</span>
-                        <span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span>
+                        <span class="tournament-status status-{{.Tournament.Status | lower}}">{{TStatus .Tournament.Status $.Lang}}</span>
                     </div>
                     <div class="admin-card-title">{{.Tournament.Title}}</div>
                     <div class="admin-card-meta">
@@ -72,7 +72,7 @@
                         <tr>
                             <td>{{.Tournament.Id}}</td>
                             <td><strong>{{.Tournament.Title}}</strong></td>
-                            <td><span class="tournament-status status-{{.Tournament.Status | lower}}">{{.Tournament.Status}}</span></td>
+                            <td><span class="tournament-status status-{{.Tournament.Status | lower}}">{{TStatus .Tournament.Status $.Lang}}</span></td>
                             <td>{{.Tournament.StartDate.Format "2006-01-02"}}</td>
                             <td>{{.Tournament.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
                             <td>{{.Count}}</td>

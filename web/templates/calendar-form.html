@@ -161,7 +161,7 @@
                                             </div>
                                             {{if .Status}}
                                             <span class="tournament-status status-{{.Status | lower}}">
-                                                {{.Status}}
+                                                {{TStatus .Status $.Lang}}
                                             </span>
                                             {{end}}
                                             {{if .Series}}
