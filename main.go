@@ -24,6 +24,11 @@ var ticker *time.Ticker
 func main() {
 	var err error
 
+	discord_token := os.Getenv("DISCORD_TOKEN")
+	if discord_token == "" {
+		panic("DISCORD_TOKEN missing")
+	}
+
 	sessionId := os.Getenv("SESSION_ID")
 	if sessionId == "" {
 		panic("SESSION_ID missing")
@@ -69,6 +74,12 @@ func main() {
 	calendarservice := service.NewCalendarService(repo)
 
 	icsService := service.NewIcsService(calendarservice, tournamentService)
+
+	b, err := service.InitBot(discord_token, tournamentService)
+	if err != nil {
+		panic(err)
+	}
+	defer b.Close()
 
 	syncInterval := time.Minute * time.Duration(syncIntervalInMinutes)
 	ticker = time.NewTicker(syncInterval)
