@@ -19,9 +19,15 @@ type Bot struct{
 }
 
 const channelName = "tournaments"
-
+var location *time.Location
 
 func InitBot(token string, service *TournamentService) (*Bot, error) {
+	l, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		return nil, err
+	}
+	location = l
+
 	channelIds := map[string]string{}
 
 	dg, err := discordgo.New("Bot " + token)
@@ -61,6 +67,8 @@ func InitBot(token string, service *TournamentService) (*Bot, error) {
 		scheduleDaily(14, 0, bot.PublishTurnamentRegistrations),
 		scheduleDaily(18, 0, bot.PublishTurnamentRegistrations),
 		scheduleDaily(19, 30, bot.PublishTurnamentRegistrations),
+		scheduleDaily(21, 00, bot.PublishTurnamentRegistrations),
+		scheduleDaily(7, 00, bot.PublishTurnamentRegistrations),
 	}
 	return bot, nil
 }
@@ -85,7 +93,7 @@ func (b *Bot) Close() {
 
 func (b *Bot)PublishTurnamentRegistrations() {
 	now := time.Now()
-	log.Printf("publish scheduled\n")
+	log.Printf("Publish scheduled\n")
 
 	if b.lastPublish.Day() != now.Day() {
 		b.published = []int{}
@@ -99,9 +107,14 @@ func (b *Bot)PublishTurnamentRegistrations() {
 		for _, r := range t.Registrations {
 			d := r.StartDate.Sub(now)
 			if d > 0 && d < time.Duration(now.Hour()*int(time.Hour)+now.Minute()*int(time.Minute)+now.Second()*int(time.Second)) {
-				text := "⏰ Turnieranmeldung für \"**%s**\"\n%s\nöffnet **heute um %s Uhr**\n📍 %s\n🔗 https://turniere.discgolf.de/index.php?p=events&sp=view&id=%d\n"
-				b.sendMessage(fmt.Sprintf(text, t.Title, r.Title, r.StartDate.Format("15:04"), t.Localtion, t.Id))
+				day := "heute"
+				if r.StartDate.Day() > now.Day() {
+					day = "morgen"
+				}
+				text := "⏰ Turnieranmeldung für \"**%s**\"\n%s\nöffnet **%s um %s Uhr**\n📍 %s\n🔗 https://turniere.discgolf.de/index.php?p=events&sp=view&id=%d\n"
+				b.sendMessage(fmt.Sprintf(text, t.Title, r.Title, day, r.StartDate.Format("15:04"), t.Localtion, t.Id))
 				b.published = append(b.published, t.Id)
+				log.Printf("Published %v\n", t.Id)
 			}
 		}
 	}
@@ -113,7 +126,7 @@ func scheduleDaily(hour, min int, task func()) *time.Timer {
     var next func() time.Time
     next = func() time.Time {
         now := time.Now()
-        n := time.Date(now.Year(), now.Month(), now.Day(), hour, min, 0, 0, now.Location())
+        n := time.Date(now.Year(), now.Month(), now.Day(), hour, min, 0, 0, location)
         if !n.After(now) {
             n = n.Add(24 * time.Hour)
         }
